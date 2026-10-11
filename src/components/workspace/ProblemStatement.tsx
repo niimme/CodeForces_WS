@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ProblemMetadata } from '../../types';
 import { MathRenderer } from '../ui/MathRenderer';
 import { WorkspaceTab } from './WorkspaceNav';
@@ -14,73 +14,6 @@ interface ProblemStatementProps {
   onToggleMaximize?: () => void;
   language?: 'cpp' | 'c' | 'kotlin' | 'java' | 'python';
 }
-
-const LOG_GUIDES = [
-  {
-    id: 'cpp',
-    name: 'C++',
-    badge: 'std::cerr',
-    color: '#2563eb',
-    bg: '#eff6ff',
-    border: '#bfdbfe',
-    code: `#include <iostream>
-
-// Stream debug outputs to cerr (separate from cout)
-std::cerr << "debug: x = " << x << std::endl;`,
-    description: 'Outputs to standard error without interfering with test case evaluation (stdout).',
-  },
-  {
-    id: 'c',
-    name: 'C',
-    badge: 'fprintf(stderr)',
-    color: '#0284c7',
-    bg: '#f0f9ff',
-    border: '#bae6fd',
-    code: `#include <stdio.h>
-
-// Print diagnostic data to stderr
-fprintf(stderr, "debug: x = %d, ans = %s\\n", x, ans);`,
-    description: 'Writes directly to the stderr stream, keeping printf output pristine for judge comparison.',
-  },
-  {
-    id: 'python',
-    name: 'Python',
-    badge: 'sys.stderr',
-    color: '#16a34a',
-    bg: '#f0fdf4',
-    border: '#bbf7d0',
-    code: `import sys
-
-# Print to stderr stream
-print(f"debug: x = {x}", file=sys.stderr)
-
-# Or write directly:
-# sys.stderr.write(f"debug: {x}\\n")`,
-    description: 'Directs messages to stderr so normal print() stdout remains clean for test assertions.',
-  },
-  {
-    id: 'java',
-    name: 'Java',
-    badge: 'System.err',
-    color: '#ea580c',
-    bg: '#fff7ed',
-    border: '#fed7aa',
-    code: `// Write diagnostic messages to System.err
-System.err.println("debug: x = " + x + ", ans = " + ans);`,
-    description: 'Routes output to the error console without contaminating System.out.',
-  },
-  {
-    id: 'kotlin',
-    name: 'Kotlin',
-    badge: 'System.err',
-    color: '#7c3aed',
-    bg: '#faf5ff',
-    border: '#e9d5ff',
-    code: `// Output string templates to System.err
-System.err.println("debug: x = $x, ans = $ans")`,
-    description: 'Emits logs safely to stderr with native Kotlin string templates.',
-  },
-];
 
 const LOG_COMMANDS: Record<string, string> = {
   cpp: 'std::cerr',
@@ -99,18 +32,8 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   onToggleMaximize,
   language = 'cpp',
 }) => {
-  const [copiedLogLang, setCopiedLogLang] = useState<string | null>(null);
-
   const currentLang = (language || 'cpp').toLowerCase();
-  const currentGuide = LOG_GUIDES.find(g => g.id.toLowerCase() === currentLang) || LOG_GUIDES[0];
   const currentLogCommand = LOG_COMMANDS[currentLang] || 'std::cerr';
-  const isCopied = copiedLogLang === currentGuide.id;
-
-  const handleCopySnippet = (snippetCode: string, langId: string) => {
-    navigator.clipboard.writeText(snippetCode);
-    setCopiedLogLang(langId);
-    setTimeout(() => setCopiedLogLang(null), 2000);
-  };
 
   return (
     <div className="problem-details-panel">
@@ -183,7 +106,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
                 gap: '8px',
               }}
             >
-              <span>Scenario Log</span>
+              <span>Log</span>
               {capturedLogs.length > 0 && (
                 <span
                   style={{
@@ -351,122 +274,6 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
               </div>
             </div>
           )}
-
-          {/* Current Language Debug Logging Guide */}
-          <div
-            style={{
-              marginTop: '16px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '16px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-            }}
-          >
-            <div style={{ marginBottom: '12px' }}>
-              <h3 style={{ fontSize: '13.5px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
-                💡 Debug Logging in {currentGuide.name}
-              </h3>
-              <p style={{ fontSize: '12px', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
-                Use standard error (<strong>stderr</strong>) to print debug output. Because test evaluation only verifies standard output (<strong>stdout</strong>), stderr logging never interferes with test case correctness!
-              </p>
-            </div>
-
-            {/* ONLY Current Language Button */}
-            <div style={{ marginBottom: '12px' }}>
-              <button
-                type="button"
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  border: `1.5px solid ${currentGuide.color}`,
-                  backgroundColor: currentGuide.bg,
-                  color: currentGuide.color,
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  cursor: 'default',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
-                id={`tab-log-guide-${currentGuide.id}`}
-              >
-                <span>{currentGuide.name}</span>
-                <code style={{ fontSize: '11px', opacity: 0.9 }}>{currentGuide.badge}</code>
-              </button>
-            </div>
-
-            {/* Current Language Guide Card */}
-            <div
-              style={{
-                backgroundColor: currentGuide.bg,
-                border: `1px solid ${currentGuide.border}`,
-                borderRadius: '10px',
-                padding: '14px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      color: '#ffffff',
-                      backgroundColor: currentGuide.color,
-                      padding: '2px 8px',
-                      borderRadius: '5px',
-                    }}
-                  >
-                    {currentGuide.name}
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#475569', fontWeight: 600 }}>
-                    {currentGuide.badge}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleCopySnippet(currentGuide.code, currentGuide.id)}
-                  style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    color: isCopied ? '#16a34a' : '#334155',
-                    borderRadius: '6px',
-                    padding: '4px 10px',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
-                  id={`btn-copy-log-${currentGuide.id}`}
-                >
-                  <span>{isCopied ? '✓ Copied!' : '📋 Copy Snippet'}</span>
-                </button>
-              </div>
-
-              <pre
-                style={{
-                  margin: '0 0 8px',
-                  padding: '10px 12px',
-                  backgroundColor: '#0f172a',
-                  color: '#f8fafc',
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  fontFamily: 'var(--font-mono)',
-                  lineHeight: 1.45,
-                  overflowX: 'auto',
-                }}
-              >
-                {currentGuide.code}
-              </pre>
-
-              <p style={{ margin: 0, fontSize: '12px', color: '#475569', lineHeight: 1.4 }}>
-                {currentGuide.description}
-              </p>
-            </div>
-          </div>
         </div>
       )}
     </div>

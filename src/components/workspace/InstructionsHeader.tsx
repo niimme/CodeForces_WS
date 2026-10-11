@@ -61,50 +61,16 @@ export const InstructionsHeader: React.FC<InstructionsHeaderProps> = ({
         </button>
       </div>
 
-      {/* Right side: Settings, User Account, and Dashboard link */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {onOpenSettings && (
-          <button
-            type="button"
-            className="instructions-settings-btn"
-            onClick={onOpenSettings}
-            id="btn-open-workspace-settings"
-            title="Configure Language, Ligatures & User Settings"
-          >
-            <span style={{ fontSize: '13px' }}>⚙️</span>
-            <span className="ws-settings-lang-badge">
-              {langDisplayMap[currentLanguage] || currentLanguage.toUpperCase()}
-            </span>
-          </button>
-        )}
-
-        {onOpenAccount && (
-          <button
-            type="button"
-            className="instructions-user-btn"
-            onClick={onOpenAccount}
-            id="btn-open-workspace-account"
-            title={currentUser?.isLoggedIn ? `@${currentUser.handle} (${currentUser.rank || 'Pupil'})` : 'Sign In / Register'}
-          >
-            <span className="instructions-user-avatar">
-              {currentUser?.isLoggedIn
-                ? (currentUser.name || currentUser.handle || 'U').charAt(0).toUpperCase()
-                : '👤'}
-            </span>
-            <span className="instructions-user-name">
-              {currentUser?.isLoggedIn ? `@${currentUser.handle}` : 'Sign In'}
-            </span>
-          </button>
-        )}
-
+      {/* Right side: Dashboard circular button with arrow */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <Link
           href="/"
           className="instructions-dashboard-btn"
           id="btn-nav-dashboard"
           title="Back to Learning Roadmap"
+          aria-label="Dashboard"
         >
-          <span>Dashboard</span>
-          <span>→</span>
+          →
         </Link>
       </div>
     </div>
