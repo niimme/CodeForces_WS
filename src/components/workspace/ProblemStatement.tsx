@@ -131,12 +131,6 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
             <h1 className="problem-title-text">
               {problem.id}. {problem.title}
             </h1>
-
-            <div className="problem-limits-badge">
-              <span>⏱️ Time: {problem.timeLimit || '1.0s'}</span>
-              <span>💾 Memory: {problem.memoryLimit || '256MB'}</span>
-              <span>⭐ Rating: {problem.rating}</span>
-            </div>
           </div>
 
           <div className="section-heading">
