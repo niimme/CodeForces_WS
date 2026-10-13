@@ -18,13 +18,6 @@ export const PathNodeCard: React.FC<PathNodeCardProps> = ({ node }) => {
       </div>
 
       <div className="node-content">
-        <div className="node-badge-row">
-          <span className="node-badge exercise-badge">
-            {node.badgeLabel}
-          </span>
-          {node.duration && <span className="node-rating">• {node.duration}</span>}
-        </div>
-
         <div className="node-title" title={node.title}>
           {node.title}
         </div>

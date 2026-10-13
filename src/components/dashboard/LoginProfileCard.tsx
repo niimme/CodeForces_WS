@@ -12,7 +12,6 @@ import {
   loginWithCredentials,
   registerAccount,
 } from '../../lib/userProgress';
-import { BadgesModal } from './BadgesModal';
 import { UserSettingsModal } from '../settings/UserSettingsModal';
 
 interface LoginProfileCardProps {
@@ -29,7 +28,6 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
   onModalClose,
 }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showBadgesModal, setShowBadgesModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -58,10 +56,6 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
   }, []);
 
   const isLoggedIn = !!progress.isLoggedIn;
-  const displayedBadges = (progress.badges || []).slice(0, 4);
-  const unlockedCount = (progress.badges || []).filter(b => !!b.unlockedAt).length;
-  const totalCount = (progress.badges || []).length;
-  const overflowCount = Math.max(0, totalCount - displayedBadges.length);
 
   const getRankColor = (rank?: string) => {
     const r = (rank || '').toLowerCase();
@@ -260,120 +254,12 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
             }}
           >
             <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.45, margin: 0 }}>
-              Sign in to track your Codeforces rating, save progress, and earn achievement badges.
+              Sign in to track your Codeforces rating and save your practice progress.
             </p>
           </div>
         )}
 
-        <div style={{ height: '1px', background: '#f1f5f9', margin: '0 0 16px' }} />
 
-        {/* Badges Section */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Badges & Achievements
-          </div>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#2563eb', background: '#eff6ff', padding: '2px 8px', borderRadius: '10px' }}>
-            {unlockedCount} / {totalCount}
-          </span>
-        </div>
-
-        {/* Badges Preview Row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-          {displayedBadges.map(badge => {
-            const isUnlocked = !!badge.unlockedAt;
-            return (
-              <div
-                key={badge.id}
-                onClick={() => setShowBadgesModal(true)}
-                title={`${badge.name}: ${badge.description}`}
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '12px',
-                  background: isUnlocked ? 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)' : '#f1f5f9',
-                  border: `1.5px solid ${isUnlocked ? '#bfdbfe' : '#e2e8f0'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                  cursor: 'pointer',
-                  opacity: isUnlocked ? 1 : 0.45,
-                  transition: 'transform 0.15s ease',
-                }}
-              >
-                {badge.icon}
-              </div>
-            );
-          })}
-
-          {overflowCount > 0 && (
-            <button
-              onClick={() => setShowBadgesModal(true)}
-              style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '12px',
-                background: '#f8fafc',
-                border: '1.5px dashed #cbd5e1',
-                color: '#64748b',
-                fontSize: '11px',
-                fontWeight: 800,
-                cursor: 'pointer',
-              }}
-              title="View all badges"
-            >
-              +{overflowCount}
-            </button>
-          )}
-        </div>
-
-        {/* View Badges Button */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-          <button
-            onClick={() => setShowBadgesModal(true)}
-            style={{
-              flex: 1,
-              background: '#eff6ff',
-              border: '1px solid #bfdbfe',
-              color: '#1d4ed8',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              padding: '9px 12px',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              transition: 'all 0.15s ease',
-            }}
-            id="btn-open-badges-modal"
-          >
-            <span>🏆</span>
-            <span>View All Badges ({totalCount})</span>
-          </button>
-
-          <Link
-            href="/badges"
-            style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              color: '#475569',
-              padding: '9px 12px',
-              borderRadius: '10px',
-              fontSize: '12px',
-              fontWeight: 700,
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            title="Open Dedicated Badge Page"
-            id="btn-open-badge-page"
-          >
-            ↗
-          </Link>
-        </div>
 
         {/* Auth Action Buttons */}
         {isLoggedIn ? (
@@ -474,29 +360,9 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
               <span>🔑</span>
               <span>Sign In / Register</span>
             </button>
-
-            <Link
-              href="/login"
-              style={{
-                textAlign: 'center',
-                fontSize: '11.5px',
-                color: '#2563eb',
-                textDecoration: 'none',
-                fontWeight: 600,
-              }}
-            >
-              Go to Account Login Page &rarr;
-            </Link>
           </div>
         )}
       </div>
-
-      {/* Badges Modal */}
-      <BadgesModal
-        badges={progress.badges || []}
-        isOpen={showBadgesModal}
-        onClose={() => setShowBadgesModal(false)}
-      />
 
       {/* Login Portal (Rendered on document.body with max z-index to NEVER clip under cards) */}
       {mounted &&
