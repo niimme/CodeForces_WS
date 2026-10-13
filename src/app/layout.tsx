@@ -1,10 +1,18 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Codeforces Interactive Learning & Practice Platform',
   description: 'Gamified learning path and split-screen workspace for top-solved Codeforces programming challenges.',
   keywords: ['Codeforces', 'Algorithms', 'Competitive Programming', 'C++', 'Java', 'Python', 'Learning Path'],
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: '#2563eb',
 };
 
 export default function RootLayout({
@@ -22,7 +30,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

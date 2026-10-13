@@ -323,6 +323,180 @@ export function computeFoldableBlocks(code: string): Map<number, FoldBlock> {
   return map;
 }
 
+export interface IndentResult {
+  newCode: string;
+  newStart: number;
+  newEnd: number;
+  modified: boolean;
+}
+
+/**
+ * Handles Tab (indentation) and Shift+Tab (back-tabbing / unindentation)
+ * Supporting single-line cursor, single-line selections, and multi-line block selections.
+ */
+export function handleTabIndentation(
+  displayCode: string,
+  start: number,
+  end: number,
+  isShift: boolean,
+  indent: string = '    '
+): IndentResult {
+  const selStart = Math.min(start, end);
+  const selEnd = Math.max(start, end);
+
+  if (isShift) {
+    // Back-tabbing / unindent: applies to multi-line selection, single-line selection, or single cursor
+    const firstLineStart = displayCode.lastIndexOf('\n', selStart - 1) + 1;
+
+    let lastLineEnd: number;
+    if (selEnd > selStart && displayCode[selEnd - 1] === '\n') {
+      lastLineEnd = selEnd - 1;
+    } else {
+      const nextNewline = displayCode.indexOf('\n', selEnd);
+      lastLineEnd = nextNewline === -1 ? displayCode.length : nextNewline;
+    }
+
+    const textToModify = displayCode.substring(firstLineStart, lastLineEnd);
+    const lines = textToModify.split('\n');
+
+    let newStart = selStart;
+    let newEnd = selEnd;
+    let currentPos = firstLineStart;
+
+    const modifiedLines = lines.map(line => {
+      const lineStartPos = currentPos;
+      currentPos += line.length + 1; // +1 for '\n'
+
+      let removeCount = 0;
+      if (line.startsWith('\t')) {
+        removeCount = 1;
+      } else {
+        while (removeCount < indent.length && removeCount < line.length && line[removeCount] === ' ') {
+          removeCount++;
+        }
+      }
+
+      if (removeCount === 0) {
+        return line;
+      }
+
+      // Adjust newStart
+      if (lineStartPos < selStart) {
+        if (selStart < lineStartPos + removeCount) {
+          newStart -= (selStart - lineStartPos);
+        } else {
+          newStart -= removeCount;
+        }
+      }
+
+      // Adjust newEnd
+      if (lineStartPos < selEnd) {
+        if (selEnd < lineStartPos + removeCount) {
+          newEnd -= (selEnd - lineStartPos);
+        } else {
+          newEnd -= removeCount;
+        }
+      }
+
+      return line.substring(removeCount);
+    });
+
+    const modifiedBlock = modifiedLines.join('\n');
+    if (modifiedBlock === textToModify) {
+      return {
+        newCode: displayCode,
+        newStart: selStart,
+        newEnd: selEnd,
+        modified: false,
+      };
+    }
+
+    const newCode =
+      displayCode.substring(0, firstLineStart) +
+      modifiedBlock +
+      displayCode.substring(lastLineEnd);
+
+    const clampedStart = Math.max(0, Math.min(newStart, newCode.length));
+    const clampedEnd = Math.max(clampedStart, Math.min(newEnd, newCode.length));
+
+    return {
+      newCode,
+      newStart: clampedStart,
+      newEnd: clampedEnd,
+      modified: true,
+    };
+  }
+
+  // Any non-empty selection (single or multi-line): indent touched line(s), NEVER delete code
+  if (selStart !== selEnd) {
+    const firstLineStart = displayCode.lastIndexOf('\n', selStart - 1) + 1;
+
+    let lastLineEnd: number;
+    if (selEnd > selStart && displayCode[selEnd - 1] === '\n') {
+      lastLineEnd = selEnd - 1;
+    } else {
+      const nextNewline = displayCode.indexOf('\n', selEnd);
+      lastLineEnd = nextNewline === -1 ? displayCode.length : nextNewline;
+    }
+
+    const textToModify = displayCode.substring(firstLineStart, lastLineEnd);
+    const lines = textToModify.split('\n');
+
+    let newStart = selStart;
+    let newEnd = selEnd;
+    let currentPos = firstLineStart;
+
+    const modifiedLines = lines.map((line, idx) => {
+      const lineStartPos = currentPos;
+      currentPos += line.length + 1; // +1 for '\n'
+
+      // Skip completely blank lines in block indentation
+      if (line.length === 0) {
+        return line;
+      }
+
+      if (lineStartPos < selStart) {
+        newStart += indent.length;
+      } else if (lineStartPos === selStart && idx === 0) {
+        // Selection starts at the beginning of the line; keep start at line start to include new indent
+      }
+
+      if (lineStartPos < selEnd) {
+        newEnd += indent.length;
+      }
+
+      return indent + line;
+    });
+
+    const modifiedBlock = modifiedLines.join('\n');
+    const newCode =
+      displayCode.substring(0, firstLineStart) +
+      modifiedBlock +
+      displayCode.substring(lastLineEnd);
+
+    const clampedStart = Math.max(0, Math.min(newStart, newCode.length));
+    const clampedEnd = Math.max(clampedStart, Math.min(newEnd, newCode.length));
+
+    return {
+      newCode,
+      newStart: clampedStart,
+      newEnd: clampedEnd,
+      modified: true,
+    };
+  }
+
+  // Single cursor without selection: insert indent at cursor
+  const newCode = displayCode.substring(0, selStart) + indent + displayCode.substring(selEnd);
+  const nextPos = selStart + indent.length;
+
+  return {
+    newCode,
+    newStart: nextPos,
+    newEnd: nextPos,
+    modified: true,
+  };
+}
+
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   code,
   onChange,
@@ -344,6 +518,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const highlightRef = useRef<HTMLPreElement>(null);
+  const pendingSelectionRef = useRef<{ start: number; end: number } | null>(null);
 
   const [activeLine, setActiveLine] = useState<number>(1);
   const [scrollTop, setScrollTop] = useState<number>(0);
@@ -594,6 +769,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       highlightRef.current.scrollTop = textareaRef.current.scrollTop;
       highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
     }
+    if (pendingSelectionRef.current && textareaRef.current) {
+      textareaRef.current.selectionStart = pendingSelectionRef.current.start;
+      textareaRef.current.selectionEnd = pendingSelectionRef.current.end;
+      pendingSelectionRef.current = null;
+      updateCursorAndLine();
+    }
   }, [displayCode]);
 
   // Handle code modifications in textarea with preservation of hidden lines
@@ -654,7 +835,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       return;
     }
 
-    // Support Tab key indentation (4 spaces)
+    // Support Tab & Shift+Tab indentation (multi-line tabbing and back tabbing)
     if (e.key === 'Tab') {
       e.preventDefault();
       const textarea = textareaRef.current;
@@ -662,14 +843,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      const indent = '    ';
 
-      const newDispCode = displayCode.substring(0, start) + indent + displayCode.substring(end);
-      handleTextareaChange(newDispCode);
+      const res = handleTabIndentation(displayCode, start, end, e.shiftKey, '    ');
+      if (!res.modified) return;
+
+      pendingSelectionRef.current = { start: res.newStart, end: res.newEnd };
+      handleTextareaChange(res.newCode);
+
+      textarea.selectionStart = res.newStart;
+      textarea.selectionEnd = res.newEnd;
 
       requestAnimationFrame(() => {
         if (textareaRef.current) {
-          textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + indent.length;
+          textareaRef.current.selectionStart = res.newStart;
+          textareaRef.current.selectionEnd = res.newEnd;
           updateCursorAndLine();
         }
       });
@@ -738,6 +925,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   }
                   id={`gutter-bp-btn-${lineNum}`}
                   aria-label={`Breakpoint line ${lineNum}`}
+                  aria-pressed={hasBreakpoint}
                 >
                   <span className={`bp-dot ${hasBreakpoint ? 'filled' : 'ghost'}`} />
                 </button>
@@ -747,6 +935,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   className="gutter-line-num"
                   onClick={() => jumpToLine(lineNum)}
                   title={`Line ${lineNum}: Click to jump`}
+                  aria-hidden="true"
                 >
                   {lineNum}
                 </span>
@@ -768,6 +957,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                       }
                       id={`gutter-fold-btn-${lineNum}`}
                       aria-label={isCollapsed ? `Expand function at line ${lineNum}` : `Collapse function at line ${lineNum}`}
+                      aria-expanded={!isCollapsed}
                     >
                       {isCollapsed ? '▸' : '▾'}
                     </button>
@@ -848,6 +1038,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             wrap="off"
             placeholder="// Write your code here..."
             id="code-editor-textarea"
+            role="textbox"
+            aria-label="Code Editor"
+            aria-multiline="true"
           />
         </div>
       </div>

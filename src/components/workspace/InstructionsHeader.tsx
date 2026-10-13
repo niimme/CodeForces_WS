@@ -36,25 +36,35 @@ export const InstructionsHeader: React.FC<InstructionsHeaderProps> = ({
   return (
     <div className="instructions-window-header">
       {/* Tab controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div
+        role="tablist"
+        aria-label="Problem workspace tabs"
+        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+      >
         <button
+          role="tab"
+          aria-selected={activeTab === 'instructions'}
+          aria-controls="panel-instructions"
           className={`instructions-tab-btn ${activeTab === 'instructions' ? 'active' : ''}`}
           onClick={() => onSelectTab('instructions')}
           id="tab-instructions"
         >
-          <span>📄</span>
+          <span aria-hidden="true">📄</span>
           <span>Instructions</span>
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'log'}
+          aria-controls="panel-log"
           className={`instructions-tab-btn ${activeTab === 'log' ? 'active' : ''}`}
           onClick={() => onSelectTab('log')}
           id="tab-log"
         >
-          <span>📋</span>
+          <span aria-hidden="true">📋</span>
           <span>Log</span>
           {logCount > 0 && (
-            <span className="instructions-tab-badge">
+            <span className="instructions-tab-badge" aria-label={`${logCount} log entries`}>
               {logCount}
             </span>
           )}
@@ -68,9 +78,9 @@ export const InstructionsHeader: React.FC<InstructionsHeaderProps> = ({
           className="instructions-dashboard-btn"
           id="btn-nav-dashboard"
           title="Back to Learning Roadmap"
-          aria-label="Dashboard"
+          aria-label="Back to Learning Roadmap"
         >
-          →
+          <span aria-hidden="true">→</span>
         </Link>
       </div>
     </div>

@@ -36,12 +36,20 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   const currentLogCommand = LOG_COMMANDS[currentLang] || 'std::cerr';
 
   return (
-    <div className="problem-details-panel">
+    <div
+      className="problem-details-panel"
+      id={activeTab === 'instructions' ? 'panel-instructions' : 'panel-log'}
+      role="tabpanel"
+      aria-labelledby={activeTab === 'instructions' ? 'tab-instructions' : 'tab-log'}
+    >
+      {/* Anchor target for Skip to main content link (WCAG 2.4.1) */}
+      <div id="main-content" tabIndex={-1} style={{ outline: 'none' }} />
+
       {/* INSTRUCTIONS TAB */}
       {activeTab === 'instructions' && (
         <>
           <div className="problem-header">
-            <div className="problem-emoji-hero" role="img" aria-label={problem.title}>
+            <div className="problem-emoji-hero" aria-hidden="true">
               {problem.emoji}
             </div>
 
@@ -56,20 +64,20 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
             </h1>
           </div>
 
-          <div className="section-heading">
-            <span>📝</span>
+          <h2 className="section-heading">
+            <span aria-hidden="true">📝</span>
             <span>Problem Statement</span>
-          </div>
+          </h2>
           <div className="statement-text">
             <MathRenderer content={problem.descriptionHtml} />
           </div>
 
           {problem.inputSpecificationHtml && (
             <>
-              <div className="section-heading">
-                <span>📥</span>
+              <h2 className="section-heading">
+                <span aria-hidden="true">📥</span>
                 <span>Input Specification</span>
-              </div>
+              </h2>
               <div className="statement-text">
                 <MathRenderer content={problem.inputSpecificationHtml} />
               </div>
@@ -78,10 +86,10 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
 
           {problem.outputSpecificationHtml && (
             <>
-              <div className="section-heading">
-                <span>📤</span>
+              <h2 className="section-heading">
+                <span aria-hidden="true">📤</span>
                 <span>Output Specification</span>
-              </div>
+              </h2>
               <div className="statement-text">
                 <MathRenderer content={problem.outputSpecificationHtml} />
               </div>
@@ -145,6 +153,9 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
           {/* Captured Logs Terminal Output OR Empty State Illustration */}
           {capturedLogs.length > 0 ? (
             <div
+              role="region"
+              aria-label="Execution logs output"
+              tabIndex={0}
               style={{
                 background: '#0f172a',
                 color: '#f8fafc',
@@ -174,7 +185,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
                       wordBreak: 'break-all',
                     }}
                   >
-                    <span style={{ color: '#64748b', marginRight: '8px', userSelect: 'none' }}>
+                    <span aria-hidden="true" style={{ color: '#64748b', marginRight: '8px', userSelect: 'none' }}>
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     {log}
@@ -211,6 +222,8 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
                   viewBox="0 0 74 74"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  focusable="false"
                 >
                   <rect
                     x="18"
