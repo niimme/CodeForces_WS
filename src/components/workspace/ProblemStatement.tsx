@@ -65,8 +65,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
           </div>
 
           <h2 className="section-heading">
-            <span aria-hidden="true">📝</span>
-            <span>Problem Statement</span>
+            Problem Statement
           </h2>
           <div className="statement-text">
             <MathRenderer content={problem.descriptionHtml} />
@@ -75,8 +74,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
           {problem.inputSpecificationHtml && (
             <>
               <h2 className="section-heading">
-                <span aria-hidden="true">📥</span>
-                <span>Input Specification</span>
+                Input Specification
               </h2>
               <div className="statement-text">
                 <MathRenderer content={problem.inputSpecificationHtml} />
@@ -87,8 +85,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
           {problem.outputSpecificationHtml && (
             <>
               <h2 className="section-heading">
-                <span aria-hidden="true">📤</span>
-                <span>Output Specification</span>
+                Output Specification
               </h2>
               <div className="statement-text">
                 <MathRenderer content={problem.outputSpecificationHtml} />

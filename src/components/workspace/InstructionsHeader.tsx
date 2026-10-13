@@ -49,7 +49,6 @@ export const InstructionsHeader: React.FC<InstructionsHeaderProps> = ({
           onClick={() => onSelectTab('instructions')}
           id="tab-instructions"
         >
-          <span aria-hidden="true">📄</span>
           <span>Instructions</span>
         </button>
 
@@ -61,7 +60,6 @@ export const InstructionsHeader: React.FC<InstructionsHeaderProps> = ({
           onClick={() => onSelectTab('log')}
           id="tab-log"
         >
-          <span aria-hidden="true">📋</span>
           <span>Log</span>
           {logCount > 0 && (
             <span className="instructions-tab-badge" aria-label={`${logCount} log entries`}>
