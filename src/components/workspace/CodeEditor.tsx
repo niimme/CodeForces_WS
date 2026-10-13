@@ -770,8 +770,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
     }
     if (pendingSelectionRef.current && textareaRef.current) {
-      textareaRef.current.selectionStart = pendingSelectionRef.current.start;
-      textareaRef.current.selectionEnd = pendingSelectionRef.current.end;
+      textareaRef.current.setSelectionRange(pendingSelectionRef.current.start, pendingSelectionRef.current.end);
       pendingSelectionRef.current = null;
       updateCursorAndLine();
     }
@@ -850,13 +849,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       pendingSelectionRef.current = { start: res.newStart, end: res.newEnd };
       handleTextareaChange(res.newCode);
 
-      textarea.selectionStart = res.newStart;
-      textarea.selectionEnd = res.newEnd;
+      textarea.setSelectionRange(res.newStart, res.newEnd);
 
       requestAnimationFrame(() => {
         if (textareaRef.current) {
-          textareaRef.current.selectionStart = res.newStart;
-          textareaRef.current.selectionEnd = res.newEnd;
+          textareaRef.current.setSelectionRange(res.newStart, res.newEnd);
           updateCursorAndLine();
         }
       });
