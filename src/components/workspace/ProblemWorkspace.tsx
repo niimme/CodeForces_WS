@@ -8,7 +8,6 @@ import { runTestCases, ExecutionSummary } from '@/lib/codeRunner';
 import { markProblemCompleted, getUserProgress, getUserSettings, UserSettings } from '@/lib/userProgress';
 import { traceCodeExecution } from '@/lib/codeTracer';
 import { ProblemMetadata, UserProgress, SupportedLanguage } from '@/types';
-import { InstructionsHeader, WorkspaceTab } from '@/components/workspace/InstructionsHeader';
 import { CodeEditor } from '@/components/workspace/CodeEditor';
 import { TestRunnerConsole } from '@/components/workspace/TestRunnerConsole';
 import { ProblemStatement } from '@/components/workspace/ProblemStatement';
@@ -66,7 +65,6 @@ function renderStepTokens(text: string): React.ReactNode[] {
 
 export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
   const [problem, setProblem] = useState<ProblemMetadata | null>(() => getProblemById(problemId) || null);
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>('instructions');
   const [language, setLanguage] = useState<'cpp' | 'c' | 'kotlin' | 'java' | 'python'>('cpp');
   const [code, setCode] = useState<string>('');
   const [selectedTestIndex, setSelectedTestIndex] = useState<number>(0);
@@ -448,9 +446,14 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
     <div className={`workspace-container mobile-tab-${mobileTab}`} style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Mobile Top Navigation & Tab Bar (Shown only on mobile <= 768px via CSS) */}
       <header className="workspace-mobile-header" aria-label="Mobile Workspace Controls">
-        <Link href="/" className="ws-mobile-back-link" title="Back to Roadmap">
-          <span>&larr;</span>
-          <span>Roadmap</span>
+        <Link
+          href="/"
+          className="ws-mobile-back-link"
+          title="Back to Roadmap"
+          aria-label="Back to Roadmap"
+          id="btn-mobile-back-roadmap"
+        >
+          <span aria-hidden="true">&larr;</span>
         </Link>
 
         <div className="ws-mobile-tabs" role="tablist">
@@ -498,20 +501,8 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
           </button>
         </div>
 
-        <button
-          className="ws-mobile-run-btn"
-          onClick={() => {
-            handleRunCode();
-            if (mobileTab === 'code') {
-              setTimeout(() => setMobileTab('tests'), 300);
-            }
-          }}
-          disabled={isRunning}
-          title="Compile & Run Solution"
-          id="btn-mobile-run-code"
-        >
-          {isRunning ? '⏳' : '▶ Run'}
-        </button>
+        {/* Empty placeholder to center tabs with the left circular back button */}
+        <div style={{ width: '32px', height: '32px', flexShrink: 0 }} aria-hidden="true" />
       </header>
 
       {/* Sizable Workspace Split Body (Controlled via CSS for desktop split vs mobile tabs) */}
@@ -668,26 +659,8 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
               flexShrink: 0,
             }}
           >
-            <InstructionsHeader
-              activeTab={activeTab}
-              onSelectTab={setActiveTab}
-              logCount={executionSummary?.capturedLogs?.length || 0}
-              currentLanguage={language}
-              onOpenSettings={() => {
-                setSettingsModalInitialTab('preferences');
-                setShowSettingsModal(true);
-              }}
-              onOpenAccount={() => {
-                setSettingsModalInitialTab(currentUser?.isLoggedIn ? 'profile' : 'auth');
-                setShowSettingsModal(true);
-              }}
-              currentUser={currentUser}
-            />
-
             <ProblemStatement
               problem={problem}
-              activeTab={activeTab}
-              capturedLogs={executionSummary?.capturedLogs || []}
               userCode={code}
               isMaximized={isMaximizedRight}
               onToggleMaximize={toggleMaximizeStatement}

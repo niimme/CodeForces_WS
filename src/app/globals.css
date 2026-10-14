@@ -984,16 +984,16 @@ button, input, select, textarea {
 }
 
 .instructions-dashboard-btn {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   color: #475569;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.15s ease;
@@ -2545,16 +2545,27 @@ body.cf-no-ligatures .code-textarea,
   .ws-mobile-back-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     color: #475569;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 700;
     text-decoration: none;
-    padding: 6px 8px;
-    border-radius: 8px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
     flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.15s ease;
+  }
+
+  .ws-mobile-back-link:hover,
+  .ws-mobile-back-link:active {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    transform: scale(1.05);
   }
 
   .ws-mobile-tabs {
@@ -2588,27 +2599,6 @@ body.cf-no-ligatures .code-textarea,
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   }
 
-  .ws-mobile-run-btn {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    border: none;
-    font-size: 12px;
-    font-weight: 800;
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-    flex-shrink: 0;
-    touch-action: manipulation;
-  }
-
-  .ws-mobile-run-btn:disabled {
-    opacity: 0.65;
-  }
-
   /* Prevent iOS zoom on code textarea by setting minimum font size */
   .code-textarea {
     font-size: 15px !important;
@@ -2639,11 +2629,15 @@ body.cf-no-ligatures .code-textarea,
   }
 
   /* Problem statement on mobile */
+  .problem-details-panel {
+    padding: 16px 16px 24px !important;
+  }
   .problem-header {
-    padding: 16px 14px !important;
+    padding: 0 0 14px 0 !important;
+    margin-bottom: 0 !important;
   }
   .problem-title-text {
-    font-size: 19px !important;
+    font-size: 20px !important;
   }
   .problem-limits-badge {
     flex-wrap: wrap;
@@ -2651,8 +2645,12 @@ body.cf-no-ligatures .code-textarea,
     font-size: 11px;
   }
   .statement-text {
-    padding: 0 14px 20px !important;
+    padding: 0 0 20px !important;
     font-size: 14px !important;
+  }
+
+  #btn-minimal-minimize {
+    display: none !important;
   }
 
   /* Test runner on mobile */
