@@ -2524,10 +2524,7 @@ body.cf-no-ligatures .code-textarea,
 }
 
 @media (max-width: 768px) {
-  /* Workspace Mobile Footer and Header */
-  .ws-mobile-statement-footer {
-    display: flex !important;
-  }
+  /* Workspace Mobile Header */
 
   .workspace-mobile-header {
     display: flex;
@@ -2542,7 +2539,8 @@ body.cf-no-ligatures .code-textarea,
     flex-shrink: 0;
   }
 
-  .ws-mobile-back-link {
+  .ws-mobile-back-link,
+  .ws-mobile-dashboard-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2561,7 +2559,9 @@ body.cf-no-ligatures .code-textarea,
   }
 
   .ws-mobile-back-link:hover,
-  .ws-mobile-back-link:active {
+  .ws-mobile-back-link:active,
+  .ws-mobile-dashboard-link:hover,
+  .ws-mobile-dashboard-link:active {
     background: #f8fafc;
     border-color: #cbd5e1;
     color: #0f172a;
@@ -2650,6 +2650,15 @@ body.cf-no-ligatures .code-textarea,
   }
 
   #btn-minimal-minimize {
+    display: none !important;
+  }
+
+  /* In mobile, hide right dashboard arrow in statement (already in top navbar) and footer button */
+  .instructions-dashboard-btn {
+    display: none !important;
+  }
+
+  .ws-mobile-statement-footer {
     display: none !important;
   }
 

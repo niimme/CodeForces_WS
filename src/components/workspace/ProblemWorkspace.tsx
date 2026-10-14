@@ -446,15 +446,8 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
     <div className={`workspace-container mobile-tab-${mobileTab}`} style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Mobile Top Navigation & Tab Bar (Shown only on mobile <= 768px via CSS) */}
       <header className="workspace-mobile-header" aria-label="Mobile Workspace Controls">
-        <Link
-          href="/"
-          className="ws-mobile-back-link"
-          title="Back to Roadmap"
-          aria-label="Back to Roadmap"
-          id="btn-mobile-back-roadmap"
-        >
-          <span aria-hidden="true">&larr;</span>
-        </Link>
+        {/* Empty placeholder to keep tabs centered with the right circular arrow button */}
+        <div style={{ width: '32px', height: '32px', flexShrink: 0 }} aria-hidden="true" />
 
         <div className="ws-mobile-tabs" role="tablist">
           <button
@@ -501,8 +494,15 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
           </button>
         </div>
 
-        {/* Empty placeholder to center tabs with the left circular back button */}
-        <div style={{ width: '32px', height: '32px', flexShrink: 0 }} aria-hidden="true" />
+        <Link
+          href="/"
+          className="ws-mobile-dashboard-link"
+          title="Back to Roadmap"
+          aria-label="Back to Roadmap"
+          id="btn-mobile-nav-roadmap"
+        >
+          <span aria-hidden="true">&rarr;</span>
+        </Link>
       </header>
 
       {/* Sizable Workspace Split Body (Controlled via CSS for desktop split vs mobile tabs) */}
@@ -667,16 +667,6 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
               language={language}
             />
 
-            {/* Mobile Bottom Button to jump to editor */}
-            <div className="ws-mobile-statement-footer">
-              <button
-                className="ws-mobile-solve-btn"
-                onClick={() => setMobileTab('code')}
-                id="btn-mobile-open-editor"
-              >
-                <span>💻 Open Code Editor & Solve &rarr;</span>
-              </button>
-            </div>
           </section>
         )}
 
