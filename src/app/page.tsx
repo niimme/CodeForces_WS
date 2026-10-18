@@ -7,11 +7,15 @@ import { ProblemMetadata, UserProgress } from '../types';
 import { LoginProfileCard } from '../components/dashboard/LoginProfileCard';
 import { LearningPath } from '../components/dashboard/LearningPath';
 import { RoadmapNavigator } from '../components/dashboard/RoadmapNavigator';
+import { ProjectsSection } from '../components/dashboard/ProjectsSection';
+import { ProjectModal } from '../components/dashboard/ProjectModal';
 
 export default function DashboardPage() {
   const [problems, setProblems] = useState<ProblemMetadata[]>([]);
   const [userProgress, setUserProgress] = useState<UserProgress>(getUserProgress());
   const [openConnectModal, setOpenConnectModal] = useState(false);
+  const [openProjectModal, setOpenProjectModal] = useState(false);
+  const [projectModalTab, setProjectModalTab] = useState('overview');
 
   useEffect(() => {
     // Load problems data
@@ -83,6 +87,22 @@ export default function DashboardPage() {
 
       {/* Mobile Quick Chapter Jump Scroller (Only visible on screens <= 860px) */}
       <nav className="mobile-chapter-pills" aria-label="Chapter Jump Navigation">
+        <button
+          className="mobile-chapter-chip"
+          onClick={() => {
+            setProjectModalTab('overview');
+            setOpenProjectModal(true);
+          }}
+          style={{
+            background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+            borderColor: '#93c5fd',
+            color: '#1d4ed8',
+            fontWeight: 800,
+          }}
+        >
+          <span>💻</span>
+          <span>Project 1: MLFQ</span>
+        </button>
         <button className="mobile-chapter-chip" onClick={() => scrollToChapter('chapter-1')}>
           <span>🌱</span>
           <span>Ch 1: Logic</span>
@@ -103,9 +123,31 @@ export default function DashboardPage() {
 
       {/* Symmetrical 3-Column Centered Layout */}
       <div className="roadmap-grid-layout">
-        {/* Left Column: Quick Chapter Navigation (Desktop) */}
+        {/* Left Column: Projects & Quick Chapter Navigation (Desktop) */}
         <div className="roadmap-left-col" onWheel={handleSideWheel}>
-          <RoadmapNavigator progress={userProgress} />
+          <div
+            style={{
+              position: 'relative',
+              top: 0,
+              maxWidth: '280px',
+              marginLeft: 'auto',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}
+          >
+            {/* Special Section on Left for Projects */}
+            <ProjectsSection
+              onOpenProjectModal={(tab) => {
+                setProjectModalTab(tab || 'overview');
+                setOpenProjectModal(true);
+              }}
+            />
+
+            {/* Quick Chapter Navigation */}
+            <RoadmapNavigator progress={userProgress} />
+          </div>
         </div>
 
         {/* Center Column: Perfectly Centered Vertical Learning Tree (Independent Scroll) */}
@@ -142,6 +184,13 @@ export default function DashboardPage() {
           </aside>
         </div>
       </div>
+
+      {/* Full Project Information Modal */}
+      <ProjectModal
+        isOpen={openProjectModal}
+        onClose={() => setOpenProjectModal(false)}
+        initialTab={projectModalTab}
+      />
     </main>
   );
 }
