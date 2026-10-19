@@ -464,7 +464,7 @@ export const TestRunnerConsole: React.FC<TestRunnerConsoleProps> = ({
                     </button>
                   )}
 
-                  {onUpdateTestCase && (
+                  {currentTest?.isCustom && onUpdateTestCase && (
                     <button
                       type="button"
                       onClick={() => setIsEditingCurrentTest(!isEditingCurrentTest)}
@@ -563,8 +563,8 @@ export const TestRunnerConsole: React.FC<TestRunnerConsoleProps> = ({
               </div>
             )}
 
-            {/* Inline Editor for Custom or Existing Test Case */}
-            {isEditingCurrentTest ? (
+            {/* Inline Editor for Custom Test Case */}
+            {isEditingCurrentTest && currentTest?.isCustom ? (
               <div
                 style={{
                   marginTop: '14px',
@@ -752,7 +752,7 @@ export const TestRunnerConsole: React.FC<TestRunnerConsoleProps> = ({
                       {currentResult?.actualOutput?.trim() || (hasRun ? '(none)' : '(not run yet)')}
                     </pre>
 
-                    {hasRun && currentResult && !currentResult.passed && currentResult.actualOutput && onUpdateTestCase && (
+                    {hasRun && currentTest?.isCustom && currentResult && !currentResult.passed && currentResult.actualOutput && onUpdateTestCase && (
                       <button
                         type="button"
                         onClick={() => {

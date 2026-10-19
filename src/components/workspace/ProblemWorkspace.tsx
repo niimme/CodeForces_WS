@@ -126,13 +126,20 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
   };
 
   const handleDeleteTestCase = (indexToDelete: number) => {
-    setTestCases(prev => prev.filter((_, idx) => idx !== indexToDelete));
+    setTestCases(prev => {
+      if (!prev[indexToDelete]?.isCustom) return prev;
+      return prev.filter((_, idx) => idx !== indexToDelete);
+    });
     setSelectedTestIndex(prev => (prev >= indexToDelete ? Math.max(0, prev - 1) : prev));
     setExecutionSummary(null);
   };
 
   const handleUpdateTestCase = (indexToUpdate: number, updated: TestCase) => {
-    setTestCases(prev => prev.map((tc, idx) => (idx === indexToUpdate ? updated : tc)));
+    setTestCases(prev => prev.map((tc, idx) => {
+      if (idx !== indexToUpdate) return tc;
+      if (!tc.isCustom) return tc;
+      return updated;
+    }));
     setExecutionSummary(null);
   };
 
