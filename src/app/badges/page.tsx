@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getUserProgress, saveUserProgress } from '../../lib/userProgress';
 import { UserProgress, Badge } from '../../types';
-import { BetaRibbon } from '../../components/dashboard/BetaRibbon';
 
 export default function BadgesPage() {
   const [userProgress, setUserProgress] = useState<UserProgress>(getUserProgress());
@@ -54,8 +53,6 @@ export default function BadgesPage() {
 
   return (
     <main className="roadmap-bg" style={{ minHeight: '100vh', paddingBottom: '5rem' }}>
-      <BetaRibbon />
-
       {/* Top Navbar */}
       <header
         className="badges-page-header"

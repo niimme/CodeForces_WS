@@ -25,10 +25,9 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       type: 'exercise',
       problemId: '0A',
       title: '0A. MLFQ Simulator',
-      subtitle: 'CS 3113 Project 1 • Multilevel Feedback Queue & PCB',
+      subtitle: 'Multilevel Feedback Queue & PCB',
       emoji: '⚙️',
       badgeLabel: '📝 Exercise',
-      duration: '1600 Rating',
       completed: completedSet.has('0A'),
     },
     {
@@ -39,7 +38,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Pete & Billy division • Math & Parity',
       emoji: '🍉',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('4A'),
     },
     {
@@ -50,7 +48,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'String length filtering & abbreviation format',
       emoji: '🔤',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('71A'),
     },
     {
@@ -61,7 +58,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Consensus voting of three friends • Brute Force',
       emoji: '👥',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('231A'),
     },
     {
@@ -72,7 +68,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Filtering qualifying cutoff scores • Arrays',
       emoji: '🏁',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('158A'),
     },
     {
@@ -83,7 +78,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: '2x1 tiling on rectangular boards • Math / Geometry',
       emoji: '🁓',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('50A'),
     },
 
@@ -96,7 +90,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Variable mutation simulation • Implementation',
       emoji: '💻',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('282A'),
     },
     {
@@ -107,7 +100,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Case-insensitive lexicographical ordering',
       emoji: '🔡',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('112A'),
     },
     {
@@ -118,7 +110,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Manhattan distance centering • 2D Matrices',
       emoji: '🔲',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('263A'),
     },
     {
@@ -129,7 +120,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Rearranging summands • Sorting & Strings',
       emoji: '➕',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('339A'),
     },
     {
@@ -140,7 +130,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Adjacent duplicate filtering • Greedy',
       emoji: '💎',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('266A'),
     },
 
@@ -153,7 +142,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Distinct character frequency • Hash Sets',
       emoji: '🚻',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('236A'),
     },
     {
@@ -164,7 +152,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Tanya subtraction algorithm • Base-10 Digits',
       emoji: '➖',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('977A'),
     },
     {
@@ -175,7 +162,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Arithmetic progression sum • Math',
       emoji: '🍌',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('546A'),
     },
     {
@@ -186,7 +172,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Passenger load tracking • Peak Capacity',
       emoji: '🚊',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('116A'),
     },
     {
@@ -197,7 +182,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Uppercase vs lowercase casing conversion',
       emoji: '🔤',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('59A'),
     },
 
@@ -210,7 +194,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: '3D vector equilibrium check • Math',
       emoji: '⚛️',
       badgeLabel: '📝 Exercise',
-      duration: '1000 Rating',
       completed: completedSet.has('69A'),
     },
     {
@@ -221,7 +204,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Discrete time queue swap simulation',
       emoji: '🚶',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('266B'),
     },
     {
@@ -232,7 +214,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Greedy coin sum strictly greater than half',
       emoji: '🪙',
       badgeLabel: '📝 Exercise',
-      duration: '900 Rating',
       completed: completedSet.has('160A'),
     },
     {
@@ -243,7 +224,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'English alphabet coverage verification',
       emoji: '🔤',
       badgeLabel: '📝 Exercise',
-      duration: '800 Rating',
       completed: completedSet.has('520A'),
     },
     {
@@ -254,7 +234,6 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       subtitle: 'Longest non-decreasing subsegment • Dynamic Programming',
       emoji: '📈',
       badgeLabel: '📝 Exercise',
-      duration: '900 Rating',
       completed: completedSet.has('580A'),
     },
   ];
