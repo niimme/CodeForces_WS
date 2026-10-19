@@ -56,7 +56,7 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="mobile-quick-stats">
             <span>🎯</span>
-            <span>{completedCount}/20</span>
+            <span>{completedCount}/{problems.length || 21}</span>
           </span>
 
           {userProgress.isLoggedIn ? (

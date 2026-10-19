@@ -4,6 +4,7 @@ export interface TestCase {
   description: string;
   input: string;
   expectedOutput: string;
+  isCustom?: boolean;
 }
 
 export interface ProblemMetadata {

@@ -16,7 +16,7 @@ export const RoadmapNavigator: React.FC<RoadmapNavigatorProps> = ({ progress }) 
       title: 'Logic & Loops',
       fullTitle: 'Chapter 1: Logic & Loops',
       icon: '🌱',
-      problems: ['4A', '71A', '231A', '158A', '50A'],
+      problems: ['0A', '4A', '71A', '231A', '158A', '50A'],
     },
     {
       id: 'chapter-2',

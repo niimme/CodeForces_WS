@@ -7,7 +7,7 @@ import { getProblemById, getAllProblems } from '@/lib/cfScraper';
 import { runTestCases, ExecutionSummary } from '@/lib/codeRunner';
 import { markProblemCompleted, getUserProgress, getUserSettings, UserSettings } from '@/lib/userProgress';
 import { traceCodeExecution } from '@/lib/codeTracer';
-import { ProblemMetadata, UserProgress, SupportedLanguage } from '@/types';
+import { ProblemMetadata, UserProgress, SupportedLanguage, TestCase } from '@/types';
 import { CodeEditor } from '@/components/workspace/CodeEditor';
 import { TestRunnerConsole } from '@/components/workspace/TestRunnerConsole';
 import { ProblemStatement } from '@/components/workspace/ProblemStatement';
@@ -105,7 +105,38 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
   const [showTracePopover, setShowTracePopover] = useState<boolean>(false);
   const [activeLineTop, setActiveLineTop] = useState<number>(75);
 
-  const currentTestCase = problem?.testCases?.[selectedTestIndex] || problem?.testCases?.[0];
+  // Dynamic test cases including custom user-added tests
+  const [testCases, setTestCases] = useState<TestCase[]>(() => problem?.testCases || []);
+
+  useEffect(() => {
+    if (problem) {
+      setTestCases(problem.testCases || []);
+      setSelectedTestIndex(0);
+      setExecutionSummary(null);
+    }
+  }, [problem]);
+
+  const handleAddTestCase = (newCase: TestCase) => {
+    setTestCases(prev => {
+      const updated = [...prev, newCase];
+      setSelectedTestIndex(updated.length - 1);
+      return updated;
+    });
+    setExecutionSummary(null);
+  };
+
+  const handleDeleteTestCase = (indexToDelete: number) => {
+    setTestCases(prev => prev.filter((_, idx) => idx !== indexToDelete));
+    setSelectedTestIndex(prev => (prev >= indexToDelete ? Math.max(0, prev - 1) : prev));
+    setExecutionSummary(null);
+  };
+
+  const handleUpdateTestCase = (indexToUpdate: number, updated: TestCase) => {
+    setTestCases(prev => prev.map((tc, idx) => (idx === indexToUpdate ? updated : tc)));
+    setExecutionSummary(null);
+  };
+
+  const currentTestCase = testCases[selectedTestIndex] || testCases[0];
   const currentResult = executionSummary?.results?.[selectedTestIndex];
   const hasRun = Boolean(executionSummary && executionSummary.results && executionSummary.results.length > 0);
   const traceSteps = useMemo(() => {
@@ -375,7 +406,7 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
     setIsRunning(true);
     try {
       // Runs C++ via backend clang++ sandbox route, or JS via browser sandbox
-      const summary = await runTestCases(code, problem.testCases, language);
+      const summary = await runTestCases(code, testCases, language);
 
       // Prepend breakpoint debugger information to captured logs
       if (breakpoints.size > 0) {
@@ -585,12 +616,15 @@ export default function ProblemWorkspace({ problemId }: ProblemWorkspaceProps) {
               }}
             >
               <TestRunnerConsole
-                testCases={problem.testCases}
+                testCases={testCases}
                 selectedTestIndex={selectedTestIndex}
                 onSelectTest={setSelectedTestIndex}
                 onRunCode={handleRunCode}
                 isRunning={isRunning}
                 executionSummary={executionSummary}
+                onAddTestCase={handleAddTestCase}
+                onDeleteTestCase={handleDeleteTestCase}
+                onUpdateTestCase={handleUpdateTestCase}
                 isMaximized={isMaximizedConsole}
                 onToggleMaximize={toggleMaximizeConsole}
                 isMinimized={isMinimizedConsole}

@@ -19,7 +19,18 @@ export const LearningPath: React.FC<LearningPathProps> = ({
   const completedSet = new Set(userProgress.completedProblemIds.map(id => id.toUpperCase()));
 
   const nodes: LearningPathNode[] = [
-    // --- CHAPTER 1: LOGIC & LOOPS (5 exercises) ---
+    // --- CHAPTER 1: LOGIC & SYSTEMS (6 exercises) ---
+    {
+      id: 'node_0A',
+      type: 'exercise',
+      problemId: '0A',
+      title: '0A. MLFQ Simulator',
+      subtitle: 'CS 3113 Project 1 • Multilevel Feedback Queue & PCB',
+      emoji: '⚙️',
+      badgeLabel: '📝 Exercise',
+      duration: '1600 Rating',
+      completed: completedSet.has('0A'),
+    },
     {
       id: 'node_4A',
       type: 'exercise',
@@ -254,9 +265,9 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       <div className="tree-vertical-line" />
 
       {/* Nodes list with chapter milestones */}
-      {nodes.map((node, index) => {
+      {nodes.map((node) => {
         let chapterHeader = null;
-        if (index === 0) {
+        if (node.problemId === '0A') {
           chapterHeader = (
             <div className="chapter-marker" key="chap_1" id="chapter-1">
               <div className="chapter-pill">
@@ -265,7 +276,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({
               </div>
             </div>
           );
-        } else if (index === 5) {
+        } else if (node.problemId === '282A') {
           chapterHeader = (
             <div className="chapter-marker" key="chap_2" id="chapter-2">
               <div className="chapter-pill">
@@ -274,7 +285,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({
               </div>
             </div>
           );
-        } else if (index === 10) {
+        } else if (node.problemId === '236A') {
           chapterHeader = (
             <div className="chapter-marker" key="chap_3" id="chapter-3">
               <div className="chapter-pill">
@@ -283,7 +294,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({
               </div>
             </div>
           );
-        } else if (index === 15) {
+        } else if (node.problemId === '69A') {
           chapterHeader = (
             <div className="chapter-marker" key="chap_4" id="chapter-4">
               <div className="chapter-pill">

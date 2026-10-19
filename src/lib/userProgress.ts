@@ -28,6 +28,16 @@ export const INITIAL_BADGES: Badge[] = [
     rarity: 'rare',
   },
   {
+    id: 'mlfq_master',
+    name: 'MLFQ Architect',
+    icon: '⚙️',
+    description: 'Simulated 3-level CPU scheduling with PCB for 0A!',
+    requirement: 'Pass all test cases of 0A MLFQ Simulator',
+    category: 'problem',
+    rarity: 'epic',
+    relatedProblemId: '0A',
+  },
+  {
     id: 'watermelon',
     name: 'Watermelon Master',
     icon: '🍉',
