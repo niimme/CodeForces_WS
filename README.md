@@ -17,7 +17,6 @@
 
 - **⚡ Split-Screen Problem Workspace**:
   - Minimalist 1px sizable dividers for flexible window resizing
-  - Top instructions toolbar (`📄 Instructions`, `📋 Log`, `💡 Hints`, `Dashboard →`)
   - Integrated Test Runner Console with instant evaluation and diagnostic logs
   - Celebration animations upon passing all test cases
 
