@@ -243,56 +243,12 @@ export const LearningPath: React.FC<LearningPathProps> = ({
       {/* Vertical Connecting Line */}
       <div className="tree-vertical-line" />
 
-      {/* Nodes list with chapter milestones */}
-      {nodes.map((node) => {
-        let chapterHeader = null;
-        if (node.problemId === '0A') {
-          chapterHeader = (
-            <div className="chapter-marker" key="chap_1" id="chapter-1">
-              <div className="chapter-pill">
-                <span>🌱</span>
-                <span>Chapter 1: The Basics of Logic & Loops</span>
-              </div>
-            </div>
-          );
-        } else if (node.problemId === '282A') {
-          chapterHeader = (
-            <div className="chapter-marker" key="chap_2" id="chapter-2">
-              <div className="chapter-pill">
-                <span>⚙️</span>
-                <span>Chapter 2: Simulation, State & Coordinates</span>
-              </div>
-            </div>
-          );
-        } else if (node.problemId === '236A') {
-          chapterHeader = (
-            <div className="chapter-marker" key="chap_3" id="chapter-3">
-              <div className="chapter-pill">
-                <span>🔤</span>
-                <span>Chapter 3: String Mastery & Logic</span>
-              </div>
-            </div>
-          );
-        } else if (node.problemId === '69A') {
-          chapterHeader = (
-            <div className="chapter-marker" key="chap_4" id="chapter-4">
-              <div className="chapter-pill">
-                <span>🎯</span>
-                <span>Chapter 4: Vectors, Queues & Greedy Sequences</span>
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <React.Fragment key={node.id}>
-            {chapterHeader}
-            <div className="tree-node-wrapper">
-              <PathNodeCard node={node} />
-            </div>
-          </React.Fragment>
-        );
-      })}
+      {/* Nodes list */}
+      {nodes.map((node) => (
+        <div className="tree-node-wrapper" key={node.id}>
+          <PathNodeCard node={node} />
+        </div>
+      ))}
     </div>
   );
 };

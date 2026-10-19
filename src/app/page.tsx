@@ -6,7 +6,6 @@ import { getUserProgress, saveUserProgress } from '../lib/userProgress';
 import { ProblemMetadata, UserProgress } from '../types';
 import { LoginProfileCard } from '../components/dashboard/LoginProfileCard';
 import { LearningPath } from '../components/dashboard/LearningPath';
-import { RoadmapNavigator } from '../components/dashboard/RoadmapNavigator';
 
 export default function DashboardPage() {
   const [problems, setProblems] = useState<ProblemMetadata[]>([]);
@@ -26,13 +25,6 @@ export default function DashboardPage() {
   const handleUpdateProgress = (updated: UserProgress) => {
     setUserProgress(updated);
     saveUserProgress(updated);
-  };
-
-  const scrollToChapter = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
   };
 
   const handleSideWheel = (e: React.WheelEvent) => {
@@ -81,33 +73,8 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Mobile Quick Chapter Jump Scroller (Only visible on screens <= 860px) */}
-      <nav className="mobile-chapter-pills" aria-label="Chapter Jump Navigation">
-        <button className="mobile-chapter-chip" onClick={() => scrollToChapter('chapter-1')}>
-          <span>🌱</span>
-          <span>Ch 1: Logic</span>
-        </button>
-        <button className="mobile-chapter-chip" onClick={() => scrollToChapter('chapter-2')}>
-          <span>⚙️</span>
-          <span>Ch 2: Simulation</span>
-        </button>
-        <button className="mobile-chapter-chip" onClick={() => scrollToChapter('chapter-3')}>
-          <span>🔤</span>
-          <span>Ch 3: Strings</span>
-        </button>
-        <button className="mobile-chapter-chip" onClick={() => scrollToChapter('chapter-4')}>
-          <span>🎯</span>
-          <span>Ch 4: Greedy</span>
-        </button>
-      </nav>
-
-      {/* Symmetrical 3-Column Centered Layout */}
+      {/* Centered 2-Column Layout */}
       <div className="roadmap-grid-layout">
-        {/* Left Column: Quick Chapter Navigation (Desktop) */}
-        <div className="roadmap-left-col" onWheel={handleSideWheel}>
-          <RoadmapNavigator progress={userProgress} />
-        </div>
-
         {/* Center Column: Perfectly Centered Vertical Learning Tree (Independent Scroll) */}
         <div className="roadmap-center-col" id="roadmap-center-scroll">
           <section aria-label="Learning Path Roadmap" style={{ width: '100%' }}>

@@ -2160,11 +2160,12 @@ body.cf-no-ligatures .code-textarea,
 
 .roadmap-grid-layout {
   display: grid;
-  grid-template-columns: 1fr minmax(460px, 580px) 1fr;
-  max-width: 1440px;
+  grid-template-columns: minmax(460px, 580px) 340px;
+  justify-content: center;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 0 1.5rem;
-  gap: 2.5rem;
+  gap: 3rem;
   align-items: stretch;
   height: 100vh;
   max-height: 100vh;
