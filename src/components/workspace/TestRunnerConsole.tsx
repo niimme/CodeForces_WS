@@ -261,6 +261,7 @@ export const TestRunnerConsole: React.FC<TestRunnerConsoleProps> = ({
                 onClick={handleOpenAddModal}
                 title="Add your own custom test case"
                 id="btn-add-custom-test"
+                className="btn-add-custom-test"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -278,8 +279,8 @@ export const TestRunnerConsole: React.FC<TestRunnerConsoleProps> = ({
                   height: '24px',
                 }}
               >
-                <span style={{ fontSize: '13px', color: '#2563eb', fontWeight: 800 }}>+</span>
-                <span>Add Test</span>
+                <span className="btn-add-custom-test-icon" style={{ fontSize: '13px', color: '#2563eb', fontWeight: 800 }}>+</span>
+                <span className="btn-add-custom-test-text">Add Test</span>
               </button>
             )}
           </div>

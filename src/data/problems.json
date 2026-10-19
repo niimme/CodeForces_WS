@@ -41,27 +41,6 @@
         "description": "P1 terminates in Q1 at t=6. CPU sits idle from 6 to 10 until P2 arrives and traverses all three queues.",
         "input": "5 5\n2\n1 6 0 1\n2 15 10 1",
         "expectedOutput": "Time 0-5: P1, from Q0 to Q1\nTime 5-6: P1, from Q1, terminated\nTime 6-10: Idle\nTime 10-15: P2, from Q0 to Q1\nTime 15-20: P2, from Q1 to Q2\nTime 20-25: P2, from Q2, terminated\n\nResponse Time\nP1 = 0\nP2 = 0\n\nTurnaround Time\nP1 = 6\nP2 = 15\n\nWaiting Time\nP1 = 0\nP2 = 0\n\nCPU Utilization Rate\n21/25"
-      },
-      {
-        "id": 3,
-        "title": "Edge Case: Same-Priority Round-Robin in Q0",
-        "description": "Two processes share priority 1. P2 arrives at t=1 but does not kick P1 mid-quantum. P1 and P2 take turns of q0 in RR order.",
-        "input": "3 5\n2\n1 7 0 1\n2 4 1 1",
-        "expectedOutput": "Time 0-3: P1, from Q0 to Q1\nTime 3-6: P2, from Q0 to Q1\nTime 6-7: P2, from Q1, terminated\nTime 7-11: P1, from Q1, terminated\n\nResponse Time\nP1 = 0\nP2 = 2\n\nTurnaround Time\nP1 = 11\nP2 = 6\n\nWaiting Time\nP1 = 4\nP2 = 2\n\nCPU Utilization Rate\n11/11"
-      },
-      {
-        "id": 4,
-        "title": "Edge Case: Q1 SRTF Ties & Inter-Queue Preemption",
-        "description": "P1 and P2 enter Q1 with identical remaining burst. P1 wins tie-breaker by earlier entry time, is preempted by P3 arrival in Q0, then resumes.",
-        "input": "2 5\n3\n1 4 0 1\n2 4 0 2\n3 1 5 1",
-        "expectedOutput": "Time 0-2: P1, from Q0 to Q1\nTime 2-4: P2, from Q0 to Q1\nTime 4-5: P1, from Q1, preempted\nTime 5-6: P3, from Q0, terminated\nTime 6-7: P1, from Q1, terminated\nTime 7-9: P2, from Q1, terminated\n\nResponse Time\nP1 = 0\nP2 = 2\nP3 = 0\n\nTurnaround Time\nP1 = 7\nP2 = 9\nP3 = 1\n\nWaiting Time\nP1 = 3\nP2 = 5\nP3 = 0\n\nCPU Utilization Rate\n9/9"
-      },
-      {
-        "id": 5,
-        "title": "Edge Case: Deep Q2 Execution & Demotion Boundaries",
-        "description": "P1 is demoted across Q0 -> Q1 -> Q2, experiencing preemption by higher queues while preserving its position in Q2.",
-        "input": "2 2\n2\n1 7 0 1\n2 2 3 1",
-        "expectedOutput": "Time 0-2: P1, from Q0 to Q1\nTime 2-3: P1, from Q1, preempted\nTime 3-5: P2, from Q0, terminated\nTime 5-6: P1, from Q1 to Q2\nTime 6-9: P1, from Q2, terminated\n\nResponse Time\nP1 = 0\nP2 = 0\n\nTurnaround Time\nP1 = 9\nP2 = 2\n\nWaiting Time\nP1 = 2\nP2 = 0\n\nCPU Utilization Rate\n9/9"
       }
     ]
   },

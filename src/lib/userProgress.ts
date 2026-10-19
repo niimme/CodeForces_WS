@@ -510,6 +510,9 @@ export function markProblemCompleted(problemId: string): UserProgress {
       if (normId === '50A' && b.id === 'math_genius' && !b.unlockedAt) {
         return { ...b, unlockedAt: new Date().toISOString().split('T')[0] };
       }
+      if (normId === '0A' && b.id === 'mlfq_master' && !b.unlockedAt) {
+        return { ...b, unlockedAt: new Date().toISOString().split('T')[0] };
+      }
       if (updatedIds.length >= 10 && b.id === 'ten_club' && !b.unlockedAt) {
         return { ...b, unlockedAt: new Date().toISOString().split('T')[0] };
       }
