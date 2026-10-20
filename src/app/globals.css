@@ -1348,11 +1348,11 @@ button, input, select, textarea {
 }
 
 .line-number-row.active {
-  background-color: rgba(2, 132, 199, 0.08);
+  background-color: rgba(0, 128, 255, 0.08);
 }
 
 .line-number-row.is-collapsed {
-  background-color: rgba(2, 132, 199, 0.04);
+  background-color: rgba(0, 128, 255, 0.04);
 }
 
 /* Breakpoint Column & Button (Independent Left Column) */
@@ -1467,16 +1467,16 @@ body.cf-no-ligatures .code-textarea,
 }
 
 .gutter-line-num:hover {
-  color: #0284c7;
+  color: #0080ff;
 }
 
 .line-number-row.active .gutter-line-num {
-  color: #0284c7;
+  color: #0080ff;
   font-weight: 700;
 }
 
 .line-number-row.is-collapsed .gutter-line-num {
-  color: #0284c7;
+  color: #0080ff;
   font-weight: 700;
 }
 
@@ -1502,7 +1502,7 @@ body.cf-no-ligatures .code-textarea,
   margin: 0;
   cursor: pointer;
   border-radius: 4px;
-  color: #0284c7;
+  color: #64a6ff;
   font-size: 11px;
   line-height: 1;
   transition: all 0.12s ease;
@@ -1510,16 +1510,16 @@ body.cf-no-ligatures .code-textarea,
 }
 
 .gutter-fold-btn:hover {
-  background-color: rgba(2, 132, 199, 0.15);
-  color: #0369a1;
+  background-color: rgba(0, 128, 255, 0.12);
+  color: #0080ff;
   transform: scale(1.1);
 }
 
 .gutter-fold-btn.collapsed {
-  background-color: rgba(2, 132, 199, 0.18);
-  color: #0284c7;
+  background-color: rgba(0, 128, 255, 0.18);
+  color: #0080ff;
   font-weight: 700;
-  box-shadow: 0 0 4px rgba(2, 132, 199, 0.25);
+  box-shadow: 0 0 4px rgba(0, 128, 255, 0.25);
 }
 
 .gutter-fold-btn.collapsed:hover {
@@ -1552,9 +1552,9 @@ body.cf-no-ligatures .code-textarea,
   left: 0;
   right: 0;
   height: 24px;
-  background-color: #f0f7ff;
-  border-top: 1px solid #e0f2fe;
-  border-bottom: 1px solid #e0f2fe;
+  background-color: #ebf5fd;
+  border-top: 1px solid #ddecfa;
+  border-bottom: 1px solid #ddecfa;
   pointer-events: none;
   z-index: 0;
   box-sizing: border-box;
@@ -1593,17 +1593,17 @@ body.cf-no-ligatures .code-textarea,
 .code-highlight-layer {
   pointer-events: none;
   background-color: transparent;
-  color: #0f172a;
+  color: #000000;
   overflow: hidden;
   z-index: 1;
 }
 
 /* Bracket / Parenthesis Matching Highlight (matching user screenshot) */
 .matching-bracket-highlight {
-  background-color: #bce4e8;
-  color: #0f172a !important;
+  background-color: #ebf5fd;
+  color: #000000 !important;
   border-radius: 2.5px;
-  box-shadow: 0 0 0 1px rgba(14, 116, 144, 0.4);
+  box-shadow: 0 0 0 1px #64a6ff;
   font-weight: 600;
   display: inline;
 }
@@ -1612,7 +1612,7 @@ body.cf-no-ligatures .code-textarea,
   z-index: 2;
   background: transparent !important;
   color: transparent !important;
-  caret-color: #0f172a !important;
+  caret-color: #0080ff !important;
   border: none;
   outline: none;
   resize: none;
@@ -1620,7 +1620,7 @@ body.cf-no-ligatures .code-textarea,
 }
 
 .code-textarea::selection {
-  background: rgba(59, 130, 246, 0.22) !important;
+  background: #cfe4ff !important;
   color: transparent !important;
 }
 

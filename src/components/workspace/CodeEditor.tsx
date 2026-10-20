@@ -23,14 +23,15 @@ interface CodeEditorProps {
   ligatures?: boolean;
   onActiveLinePosChange?: (topPos: number) => void;
 }
-
-// Tokenizer regex matching the exact font & syntax colors from the user screenshot:
-// - Keywords (let, while, if, else, break, continue, int, etc.): #0284c7 (vivid blue)
-// - Operators (===, =, <, +, ++, -, etc.): #0284c7 (vivid blue)
-// - Variables & Identifiers (poem, count, move, etc.): #7c3aed (purple/violet)
-// - Function calls (followed by '('): #7c3aed with purple underline
-// - Literals (0, 8, true, false): #dc2626 (red)
-// - Strings ("", '🏁', ",", " "): #16a34a (green)
+// Tokenizer regex matching the exact font & syntax colors from the theme:
+// - Keywords & Types (let, while, if, else, break, continue, int, etc.): #0080ff (vivid blue)
+// - Operators (===, =, <, +, ++, -, etc.): #0080ff (vivid blue)
+// - Variables & Identifiers (poem, count, move, etc.): #7a009f (purple/violet)
+// - Function calls (followed by '('): #b701ff with #d875ff underline
+// - Literals (0, 8, true, false): #f33536 (coral red)
+// - Strings (""): #3e8a01 (forest green)
+// - Punctuation & Delimiters ((), {}, [], ;, ., ,): #000000 (black)
+// - Comments: #888888 (italic)
 const TOKEN_REGEX = new RegExp(
   '(' +
     // 1: Comments (// ... or /* ... */)
@@ -42,18 +43,22 @@ const TOKEN_REGEX = new RegExp(
     // 3: Preprocessor (#include, #define)
     '^\\s*#[a-zA-Z_]+[^\\n]*' +
   ')|(' +
+    // 4: Keywords & Types
     '\\b(?:let|var|val|const|fun|if|else|while|for|do|switch|case|default|break|continue|return|when|using|namespace|package|class|struct|union|enum|interface|object|public|private|protected|internal|override|open|data|sealed|companion|init|constructor|suspend|inline|reified|typealias|by|is|in|as|template|typename|int|long|double|float|char|bool|boolean|byte|short|void|string|String|auto|static|final|abstract|synchronized|transient|volatile|native|strictfp|extends|implements|new|this|super|instanceof|try|catch|finally|throw|throws|assert|sizeof|typedef|unsigned|signed|extern|register|goto|def|import|from)\\b' +
   ')|(' +
     // 5: Booleans & Numbers (RED in screenshot)
     '\\b(?:true|false|null|nil|None)\\b|\\b\\d+(?:\\.\\d+)?\\b' +
   ')|(' +
-    // 6: Operators (BLUE in screenshot: ===, ==, !=, =, <, >, +, ++, -, etc.)
+    // 6: Black Punctuation & Delimiters: (), {}, [], ;, ., ,
+    '[(){}\\[\\];.,]' +
+  ')|(' +
+    // 7: Operators (BLUE: ===, ==, !=, =, <, >, +, ++, -, etc. Excluding dot and comma)
     '===|==|!=|>=|<=|&&|\\|\\||<<|>>|\\+\\+|--|\\+=|-=|\\*=|\\/=|%=|->|::|[+\\-*\\/%&|^!~<>=?:_]' +
   ')|(' +
-    // 7: Function call identifiers (followed by '(') (PURPLE with underline in screenshot)
+    // 8: Function call identifiers (followed by '(') (PURPLE with underline)
     '\\b[a-zA-Z_$][a-zA-Z0-9_$]*(?=\\s*\\()' +
   ')|(' +
-    // 8: General variables & identifiers (PURPLE in screenshot)
+    // 9: General variables & identifiers (PURPLE)
     '\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b' +
   ')',
   'gm'
@@ -210,24 +215,30 @@ function highlightSyntax(rawCode: string, matchingBrackets?: Set<number> | null)
       html += renderChunk(rawCode.substring(lastIndex, match.index), lastIndex);
     }
 
-    const [full, comment, str, preproc, keyword, boolNum, op, fnCall, ident] = match;
+    const [full, comment, str, preproc, keyword, boolNum, punct, op, fnCall, ident] = match;
 
     if (comment) {
-      html += `<span style="color: #94a3b8; font-style: italic;">${escapeHtml(comment)}</span>`;
+      html += `<span style="color: #888888; font-style: italic;">${escapeHtml(comment)}</span>`;
     } else if (str) {
-      html += `<span style="color: #16a34a; font-weight: 500;">${escapeHtml(str)}</span>`;
+      html += `<span style="color: #3e8a01; font-weight: 500;">${escapeHtml(str)}</span>`;
     } else if (preproc) {
-      html += `<span style="color: #0284c7; font-weight: 600;">${escapeHtml(preproc)}</span>`;
+      html += `<span style="color: #0080ff; font-weight: 600;">${escapeHtml(preproc)}</span>`;
     } else if (keyword) {
-      html += `<span style="color: #0284c7; font-weight: 600;">${escapeHtml(keyword)}</span>`;
+      html += `<span style="color: #0080ff; font-weight: 600;">${escapeHtml(keyword)}</span>`;
     } else if (boolNum) {
-      html += `<span style="color: #dc2626; font-weight: 500;">${escapeHtml(boolNum)}</span>`;
+      html += `<span style="color: #f33536; font-weight: 500;">${escapeHtml(boolNum)}</span>`;
+    } else if (punct) {
+      if (matchingBrackets && matchingBrackets.has(match.index)) {
+        html += `<span class="matching-bracket-highlight">${escapeHtml(punct)}</span>`;
+      } else {
+        html += `<span style="color: #000000; font-weight: 500;">${escapeHtml(punct)}</span>`;
+      }
     } else if (op) {
-      html += `<span style="color: #0284c7; font-weight: 600;">${escapeHtml(op)}</span>`;
+      html += `<span style="color: #0080ff; font-weight: 600;">${escapeHtml(op)}</span>`;
     } else if (fnCall) {
-      html += `<span style="color: #7c3aed; font-weight: 500; text-decoration: underline; text-decoration-color: #c084fc; text-underline-offset: 2px;">${escapeHtml(fnCall)}</span>`;
+      html += `<span style="color: #b701ff; font-weight: 500; text-decoration: underline; text-decoration-color: #d875ff; text-underline-offset: 2px;">${escapeHtml(fnCall)}</span>`;
     } else if (ident) {
-      html += `<span style="color: #7c3aed; font-weight: 500;">${escapeHtml(ident)}</span>`;
+      html += `<span style="color: #7a009f; font-weight: 500;">${escapeHtml(ident)}</span>`;
     } else {
       html += renderChunk(full, match.index);
     }
