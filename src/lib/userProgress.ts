@@ -28,16 +28,6 @@ export const INITIAL_BADGES: Badge[] = [
     rarity: 'rare',
   },
   {
-    id: 'mlfq_master',
-    name: 'MLFQ Architect',
-    icon: '⚙️',
-    description: 'Simulated 3-level CPU scheduling with PCB for 0A!',
-    requirement: 'Pass all test cases of 0A MLFQ Simulator',
-    category: 'problem',
-    rarity: 'epic',
-    relatedProblemId: '0A',
-  },
-  {
     id: 'watermelon',
     name: 'Watermelon Master',
     icon: '🍉',
@@ -508,9 +498,6 @@ export function markProblemCompleted(problemId: string): UserProgress {
         return { ...b, unlockedAt: new Date().toISOString().split('T')[0] };
       }
       if (normId === '50A' && b.id === 'math_genius' && !b.unlockedAt) {
-        return { ...b, unlockedAt: new Date().toISOString().split('T')[0] };
-      }
-      if (normId === '0A' && b.id === 'mlfq_master' && !b.unlockedAt) {
         return { ...b, unlockedAt: new Date().toISOString().split('T')[0] };
       }
       if (updatedIds.length >= 10 && b.id === 'ten_club' && !b.unlockedAt) {

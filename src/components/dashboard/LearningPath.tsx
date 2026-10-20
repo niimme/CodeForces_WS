@@ -19,17 +19,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({
   const completedSet = new Set(userProgress.completedProblemIds.map(id => id.toUpperCase()));
 
   const nodes: LearningPathNode[] = [
-    // --- CHAPTER 1: LOGIC & SYSTEMS (6 exercises) ---
-    {
-      id: 'node_0A',
-      type: 'exercise',
-      problemId: '0A',
-      title: '0A. MLFQ Simulator',
-      subtitle: 'Multilevel Feedback Queue & PCB',
-      emoji: '⚙️',
-      badgeLabel: '📝 Exercise',
-      completed: completedSet.has('0A'),
-    },
+    // --- CHAPTER 1: LOGIC & SYSTEMS (5 exercises) ---
     {
       id: 'node_4A',
       type: 'exercise',
