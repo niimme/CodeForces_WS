@@ -295,12 +295,16 @@ export function saveUserProgress(progress: UserProgress): void {
     }
 
     // Also persist progress to accounts registry if logged into an account
-    if (progress.isLoggedIn && progress.userId?.startsWith('acc_')) {
+    if (progress.isLoggedIn && progress.handle && progress.handle !== 'guest') {
       const raw = localStorage.getItem(AUTH_ACCOUNTS_KEY);
       if (raw) {
         const accounts: Record<string, AuthAccount> = JSON.parse(raw);
+        let modified = false;
         for (const key of Object.keys(accounts)) {
-          if (accounts[key].handle.toLowerCase() === progress.handle.toLowerCase()) {
+          if (
+            accounts[key].handle.toLowerCase() === progress.handle.toLowerCase() ||
+            (progress.email && accounts[key].email && accounts[key].email.toLowerCase() === progress.email.toLowerCase())
+          ) {
             accounts[key].completedProblemIds = progress.completedProblemIds;
             accounts[key].badges = progress.badges;
             accounts[key].rating = progress.rating ?? 1200;
@@ -308,9 +312,11 @@ export function saveUserProgress(progress: UserProgress): void {
             accounts[key].streakDays = progress.streakDays;
             accounts[key].preferredLanguage = progress.preferredLanguage;
             accounts[key].editorLigatures = progress.editorLigatures;
-            localStorage.setItem(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts));
-            break;
+            modified = true;
           }
+        }
+        if (modified) {
+          localStorage.setItem(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts));
         }
       }
     }
@@ -360,10 +366,27 @@ export function loginUser(profile: UserProgress): UserProgress {
   return loggedIn;
 }
 
+function encodePassword(pw: string): string {
+  try {
+    return btoa(encodeURIComponent(pw));
+  } catch {
+    return btoa(pw);
+  }
+}
+
+function verifyPassword(inputPw: string, storedHash: string): boolean {
+  if (!storedHash) return false;
+  if (storedHash === encodePassword(inputPw)) return true;
+  try {
+    if (storedHash === btoa(inputPw)) return true;
+  } catch {}
+  return false;
+}
+
 export function registerAccount(
-  email: string,
+  emailOrUsername: string,
   password: string,
-  handle: string,
+  handle?: string,
   preferredLanguage: SupportedLanguage = 'cpp'
 ): { success: boolean; user?: UserProgress; error?: string } {
   if (typeof window === 'undefined') return { success: false, error: 'Browser required' };
@@ -371,35 +394,52 @@ export function registerAccount(
     const raw = localStorage.getItem(AUTH_ACCOUNTS_KEY);
     const accounts: Record<string, AuthAccount> = raw ? JSON.parse(raw) : {};
 
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanHandle = handle.trim().replace(/^@/, '');
+    let cleanHandle = (handle || emailOrUsername).trim().replace(/^@/, '');
+    let cleanEmail = emailOrUsername.trim().toLowerCase();
 
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      return { success: false, error: 'Please enter a valid email address.' };
+    if (cleanEmail.includes('@')) {
+      if (!handle) {
+        cleanHandle = cleanEmail.split('@')[0];
+      }
+    } else {
+      cleanHandle = emailOrUsername.trim().replace(/^@/, '');
+      cleanEmail = `${cleanHandle.toLowerCase()}@local.dev`;
     }
-    if (!password || password.length < 6) {
-      return { success: false, error: 'Password must be at least 6 characters.' };
-    }
+
     if (!cleanHandle || cleanHandle.length < 2) {
-      return { success: false, error: 'Handle must be at least 2 characters.' };
+      return { success: false, error: 'Username must be at least 2 characters.' };
+    }
+    if (!password || password.length < 4) {
+      return { success: false, error: 'Password must be at least 4 characters.' };
     }
 
-    if (accounts[cleanEmail]) {
-      return { success: false, error: 'An account with this email already exists.' };
+    const handleKey = cleanHandle.toLowerCase();
+    const emailKey = cleanEmail.toLowerCase();
+
+    const exists = Object.values(accounts).some(
+      acc => acc.handle.toLowerCase() === handleKey || (acc.email && acc.email.toLowerCase() === emailKey)
+    );
+    if (exists || accounts[handleKey] || accounts[emailKey]) {
+      return { success: false, error: 'An account with this username already exists. Please sign in instead.' };
     }
 
+    const currentProgress = getUserProgress();
     const newAccount: AuthAccount = {
       email: cleanEmail,
-      passwordHash: btoa(password), // Simple base64 encoding for local demo auth
+      passwordHash: encodePassword(password),
       handle: cleanHandle,
       name: cleanHandle,
       rating: 1200,
       rank: 'Pupil',
       preferredLanguage,
       editorLigatures: true,
+      streakDays: 1,
+      completedProblemIds: currentProgress.completedProblemIds || [],
+      badges: currentProgress.badges || INITIAL_BADGES,
     };
 
-    accounts[cleanEmail] = newAccount;
+    accounts[handleKey] = newAccount;
+    accounts[emailKey] = newAccount;
     localStorage.setItem(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts));
 
     const userProfile: UserProgress = {
@@ -411,8 +451,8 @@ export function registerAccount(
       rating: 1200,
       rank: 'Pupil',
       streakDays: 1,
-      completedProblemIds: [],
-      badges: INITIAL_BADGES,
+      completedProblemIds: newAccount.completedProblemIds || [],
+      badges: newAccount.badges || INITIAL_BADGES,
       preferredLanguage,
       editorLigatures: true,
     };
@@ -424,46 +464,58 @@ export function registerAccount(
   }
 }
 
-export function loginWithCredentials(emailOrHandle: string, password: string): { success: boolean; user?: UserProgress; error?: string } {
+export function loginWithCredentials(
+  emailOrHandle: string,
+  password: string
+): { success: boolean; user?: UserProgress; error?: string; notFound?: boolean } {
   if (typeof window === 'undefined') return { success: false, error: 'Browser required' };
   try {
     const raw = localStorage.getItem(AUTH_ACCOUNTS_KEY);
     const accounts: Record<string, AuthAccount> = raw ? JSON.parse(raw) : {};
 
-    const query = emailOrHandle.trim().toLowerCase();
-    let account = accounts[query];
+    const query = emailOrHandle.trim().toLowerCase().replace(/^@/, '');
+    if (!query) {
+      return { success: false, error: 'Please enter a username or email.' };
+    }
+    if (!password) {
+      return { success: false, error: 'Please enter your password.' };
+    }
 
+    let account: AuthAccount | undefined = accounts[query];
     if (!account) {
       account = Object.values(accounts).find(
-        acc => acc.handle.toLowerCase() === query || acc.email.toLowerCase() === query
-      )!;
+        acc => acc.handle.toLowerCase() === query || (acc.email && acc.email.toLowerCase() === query)
+      );
     }
 
     if (!account) {
-      // Check built-in demo profiles
-      if (DEMO_PROFILES[query]) {
-        const demo = DEMO_PROFILES[query];
-        loginUser(demo);
-        return { success: true, user: demo };
-      }
-      return { success: false, error: 'Account not found. Please register or check your credentials.' };
+      return {
+        success: false,
+        error: `Account "@${query}" not found. Please create an account or verify your username.`,
+        notFound: true,
+      };
     }
 
-    if (account.passwordHash !== btoa(password)) {
-      return { success: false, error: 'Invalid password. Please try again.' };
+    if (!verifyPassword(password, account.passwordHash)) {
+      return { success: false, error: 'Incorrect password. Please verify and try again.' };
     }
+
+    const current = getUserProgress();
+    const mergedCompleted = Array.from(
+      new Set([...(account.completedProblemIds || []), ...(current.completedProblemIds || [])])
+    );
 
     const userProfile: UserProgress = {
       userId: `acc_${account.handle}`,
-      name: account.name,
+      name: account.name || account.handle,
       handle: account.handle,
       email: account.email,
       isLoggedIn: true,
-      rating: account.rating,
-      rank: account.rank,
+      rating: account.rating ?? 1200,
+      rank: account.rank ?? 'Pupil',
       streakDays: (account as any).streakDays || 1,
       avatarUrl: account.avatarUrl,
-      completedProblemIds: (account as any).completedProblemIds || [],
+      completedProblemIds: mergedCompleted,
       badges: (account as any).badges || INITIAL_BADGES,
       preferredLanguage: account.preferredLanguage || 'cpp',
       editorLigatures: account.editorLigatures ?? true,

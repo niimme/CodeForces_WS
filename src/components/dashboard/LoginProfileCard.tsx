@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import Link from 'next/link';
 import { UserProgress } from '../../types';
 import {
-  DEMO_PROFILES,
   INITIAL_BADGES,
   loginUser,
   logoutUser,
@@ -39,15 +37,27 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
 
   const handleCloseModal = () => {
     setShowLoginModal(false);
+    setLoginError(null);
+    setAccountNotFound(false);
     onModalClose?.();
   };
 
-  // Login modal tab: 'cf' | 'credentials' | 'demo'
-  const [loginTab, setLoginTab] = useState<'cf' | 'credentials' | 'demo'>('cf');
+  // Modal active tab: 'signin' | 'register'
+  const [modalTab, setModalTab] = useState<'signin' | 'register'>('signin');
 
-  // Auth form state
+  // Sign In form state
   const [handleInput, setHandleInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [accountNotFound, setAccountNotFound] = useState(false);
+
+  // Register form state
+  const [regUsername, setRegUsername] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [showRegPassword, setShowRegPassword] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -73,26 +83,22 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
     onUpdateProgress(guest);
   };
 
-  const handleModalSignIn = (customHandle?: string) => {
-    const targetHandle = (customHandle || handleInput).trim();
-    if (!targetHandle) return;
+  const handleModalSignIn = () => {
+    const targetHandle = handleInput.trim();
+    if (!targetHandle) {
+      setLoginError('Please enter your username or email.');
+      return;
+    }
+    if (!passwordInput) {
+      setLoginError('Please enter your password.');
+      return;
+    }
 
     setIsLoading(true);
     setLoginError(null);
+    setAccountNotFound(false);
 
     try {
-      const lower = targetHandle.toLowerCase();
-      if (DEMO_PROFILES[lower]) {
-        const demo = DEMO_PROFILES[lower];
-        const updated = loginUser(demo);
-        onUpdateProgress(updated);
-        handleCloseModal();
-        setHandleInput('');
-        setPasswordInput('');
-        return;
-      }
-
-      // Check registered accounts or local credentials
       const res = loginWithCredentials(targetHandle, passwordInput);
       if (res.success && res.user) {
         onUpdateProgress(res.user);
@@ -100,23 +106,10 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
         setHandleInput('');
         setPasswordInput('');
       } else {
-        // Fallback: create quick local guest profile for user
-        const fallbackProfile: UserProgress = {
-          userId: `usr_${targetHandle}`,
-          name: targetHandle,
-          handle: targetHandle,
-          isLoggedIn: true,
-          rating: 1200,
-          rank: 'Pupil',
-          streakDays: 1,
-          completedProblemIds: progress.completedProblemIds || [],
-          badges: progress.badges || INITIAL_BADGES,
-        };
-        const updated = loginUser(fallbackProfile);
-        onUpdateProgress(updated);
-        handleCloseModal();
-        setHandleInput('');
-        setPasswordInput('');
+        setLoginError(res.error || 'Login failed. Please verify credentials.');
+        if (res.notFound) {
+          setAccountNotFound(true);
+        }
       }
     } catch (err: any) {
       setLoginError(err.message || 'Login failed. Please check credentials.');
@@ -125,12 +118,68 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
     }
   };
 
+  const handleModalRegister = () => {
+    const cleanUser = regUsername.trim().replace(/^@/, '');
+    const cleanEmail = regEmail.trim();
 
-  const handleQuickDemo = (key: string) => {
-    if (DEMO_PROFILES[key]) {
-      const updated = loginUser(DEMO_PROFILES[key]);
-      onUpdateProgress(updated);
-      handleCloseModal();
+    if (!cleanUser || cleanUser.length < 2) {
+      setLoginError('Username must be at least 2 characters.');
+      return;
+    }
+    if (cleanEmail && !cleanEmail.includes('@')) {
+      setLoginError('Please enter a valid email address or leave it blank.');
+      return;
+    }
+    if (!regPassword || regPassword.length < 4) {
+      setLoginError('Password must be at least 4 characters.');
+      return;
+    }
+    if (regPassword !== regConfirmPassword) {
+      setLoginError('Passwords do not match. Please re-enter.');
+      return;
+    }
+
+    setIsLoading(true);
+    setLoginError(null);
+
+    try {
+      const res = registerAccount(cleanEmail || cleanUser, regPassword, cleanUser);
+      if (res.success && res.user) {
+        onUpdateProgress(res.user);
+        handleCloseModal();
+        setRegUsername('');
+        setRegEmail('');
+        setRegPassword('');
+        setRegConfirmPassword('');
+      } else {
+        setLoginError(res.error || 'Registration failed.');
+      }
+    } catch (err: any) {
+      setLoginError(err.message || 'An error occurred during account creation.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleQuickCreateFromSignIn = () => {
+    const cleanUser = handleInput.trim().replace(/^@/, '');
+    if (!cleanUser || !passwordInput) return;
+    setIsLoading(true);
+    setLoginError(null);
+    try {
+      const res = registerAccount(cleanUser, passwordInput, cleanUser);
+      if (res.success && res.user) {
+        onUpdateProgress(res.user);
+        handleCloseModal();
+        setHandleInput('');
+        setPasswordInput('');
+      } else {
+        setLoginError(res.error || 'Could not create account.');
+      }
+    } catch (err: any) {
+      setLoginError(err.message || 'Registration failed.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -403,7 +452,7 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
               }}
             >
               {/* Modal Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div
                     style={{
@@ -422,10 +471,12 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
                   </div>
                   <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                      Account Sign In
+                      {modalTab === 'signin' ? 'Account Sign In' : 'Create Real Account'}
                     </h3>
                     <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>
-                      Sign in to save solutions, streaks & achievements
+                      {modalTab === 'signin'
+                        ? 'Sign in to save solutions, streaks & achievements'
+                        : 'Create your account to persist ratings, solutions & code'}
                     </p>
                   </div>
                 </div>
@@ -451,6 +502,73 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
                 </button>
               </div>
 
+              {/* Segmented Tab Switcher */}
+              <div
+                style={{
+                  display: 'flex',
+                  background: '#f1f5f9',
+                  padding: '4px',
+                  borderRadius: '12px',
+                  marginBottom: '18px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalTab('signin');
+                    setLoginError(null);
+                    setAccountNotFound(false);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    borderRadius: '9px',
+                    border: 'none',
+                    background: modalTab === 'signin' ? '#ffffff' : 'transparent',
+                    color: modalTab === 'signin' ? '#0f172a' : '#64748b',
+                    fontWeight: modalTab === 'signin' ? 700 : 600,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    boxShadow: modalTab === 'signin' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                  id="tab-btn-modal-signin"
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalTab('register');
+                    setLoginError(null);
+                    setAccountNotFound(false);
+                    if (handleInput.trim() && !regUsername) {
+                      setRegUsername(handleInput.trim());
+                    }
+                    if (passwordInput && !regPassword) {
+                      setRegPassword(passwordInput);
+                      setRegConfirmPassword(passwordInput);
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    borderRadius: '9px',
+                    border: 'none',
+                    background: modalTab === 'register' ? '#ffffff' : 'transparent',
+                    color: modalTab === 'register' ? '#0f172a' : '#64748b',
+                    fontWeight: modalTab === 'register' ? 700 : 600,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    boxShadow: modalTab === 'register' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                  id="tab-btn-modal-register"
+                >
+                  Create Account
+                </button>
+              </div>
+
               {loginError && (
                 <div
                   style={{
@@ -462,155 +580,283 @@ export const LoginProfileCard: React.FC<LoginProfileCardProps> = ({
                     fontSize: '12.5px',
                     marginBottom: '14px',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
+                    flexDirection: 'column',
+                    gap: '6px',
                   }}
                 >
-                  <span>⚠️</span>
-                  <span>{loginError}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>⚠️</span>
+                    <span>{loginError}</span>
+                  </div>
+                  {accountNotFound && modalTab === 'signin' && (
+                    <button
+                      type="button"
+                      onClick={handleQuickCreateFromSignIn}
+                      style={{
+                        alignSelf: 'flex-start',
+                        marginTop: '4px',
+                        background: '#dc2626',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '5px 10px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                      id="btn-quick-create-account"
+                    >
+                      Create account as &quot;{handleInput.trim()}&quot; with this password &rarr;
+                    </button>
+                  )}
                 </div>
               )}
 
-              {/* Account Sign In Form */}
-              <div>
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                    Username or Email
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter your username"
-                    value={handleInput}
-                    onChange={e => setHandleInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleModalSignIn()}
+              {/* TAB 1: Sign In Form */}
+              {modalTab === 'signin' && (
+                <div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                      Username or Email
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter your username or email"
+                      value={handleInput}
+                      onChange={e => {
+                        setHandleInput(e.target.value);
+                        setAccountNotFound(false);
+                      }}
+                      onKeyDown={e => e.key === 'Enter' && handleModalSignIn()}
+                      style={{
+                        width: '100%',
+                        padding: '11px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      id="input-login-username-modal"
+                      autoFocus
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>
+                        Password
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '11.5px',
+                          color: '#2563eb',
+                          cursor: 'pointer',
+                          padding: 0,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {showPassword ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      value={passwordInput}
+                      onChange={e => {
+                        setPasswordInput(e.target.value);
+                        setAccountNotFound(false);
+                      }}
+                      onKeyDown={e => e.key === 'Enter' && handleModalSignIn()}
+                      style={{
+                        width: '100%',
+                        padding: '11px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      id="input-login-password-modal"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => handleModalSignIn()}
+                    disabled={isLoading || !handleInput.trim() || !passwordInput}
                     style={{
                       width: '100%',
-                      padding: '11px 14px',
+                      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                      color: '#ffffff',
+                      border: 'none',
                       borderRadius: '10px',
-                      border: '1.5px solid #cbd5e1',
+                      padding: '12px',
                       fontSize: '14px',
-                      fontFamily: 'inherit',
-                      outline: 'none',
-                      boxSizing: 'border-box',
+                      fontWeight: 700,
+                      cursor: isLoading || !handleInput.trim() || !passwordInput ? 'not-allowed' : 'pointer',
+                      opacity: isLoading || !handleInput.trim() || !passwordInput ? 0.6 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(37, 99, 235, 0.28)',
                     }}
-                    id="input-cf-handle-modal"
-                  />
-                </div>
-
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                    Password (Optional for Demo Profiles)
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="Enter password"
-                    value={passwordInput}
-                    onChange={e => setPasswordInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleModalSignIn()}
-                    style={{
-                      width: '100%',
-                      padding: '11px 14px',
-                      borderRadius: '10px',
-                      border: '1.5px solid #cbd5e1',
-                      fontSize: '14px',
-                      fontFamily: 'inherit',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                    }}
-                    id="input-password-modal"
-                  />
-                </div>
-
-                <button
-                  onClick={() => handleModalSignIn()}
-                  disabled={isLoading || !handleInput.trim()}
-                  style={{
-                    width: '100%',
-                    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '10px',
-                    padding: '12px',
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    cursor: isLoading || !handleInput.trim() ? 'not-allowed' : 'pointer',
-                    opacity: isLoading || !handleInput.trim() ? 0.6 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    marginBottom: '12px',
-                  }}
-                  id="btn-confirm-cf-handle"
-                >
-                  {isLoading ? <span>Signing In...</span> : <span>Sign In &rarr;</span>}
-                </button>
-
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-                  <Link
-                    href="/login"
-                    onClick={handleCloseModal}
-                    style={{
-                      fontSize: '12px',
-                      color: '#2563eb',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                    }}
+                    id="btn-confirm-cf-handle"
                   >
-                    Need an account? Open Register Page &rarr;
-                  </Link>
+                    {isLoading ? <span>Signing In...</span> : <span>Sign In &rarr;</span>}
+                  </button>
                 </div>
+              )}
 
-                {/* Quick Select Demo Handles */}
-                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-                    Or try a popular handle:
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <button
-                      onClick={() => handleQuickDemo('nicholas')}
+              {/* TAB 2: Create Real Account Form */}
+              {modalTab === 'register' && (
+                <div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Choose a username"
+                      value={regUsername}
+                      onChange={e => setRegUsername(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleModalRegister()}
                       style={{
-                        background: '#f8fafc',
-                        border: '1px solid #e2e8f0',
+                        width: '100%',
+                        padding: '11px 14px',
                         borderRadius: '10px',
-                        padding: '10px 12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        textAlign: 'left',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        boxSizing: 'border-box',
                       }}
-                    >
-                      <div>
-                        <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '13px' }}>@nicholas</span>
-                        <span style={{ fontSize: '11.5px', color: '#64748b', marginLeft: '8px' }}>Specialist • 1540</span>
-                      </div>
-                      <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700 }}>Connect &rarr;</span>
-                    </button>
+                      id="input-modal-reg-username"
+                      autoFocus
+                    />
+                  </div>
 
-                    <button
-                      onClick={() => handleQuickDemo('tourist')}
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                      Email (Optional)
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="you@example.com (optional)"
+                      value={regEmail}
+                      onChange={e => setRegEmail(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleModalRegister()}
                       style={{
-                        background: '#f8fafc',
-                        border: '1px solid #e2e8f0',
+                        width: '100%',
+                        padding: '11px 14px',
                         borderRadius: '10px',
-                        padding: '10px 12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        textAlign: 'left',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        boxSizing: 'border-box',
                       }}
-                    >
-                      <div>
-                        <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '13px' }}>@tourist</span>
-                        <span style={{ fontSize: '11.5px', color: '#dc2626', marginLeft: '8px' }}>Legendary Grandmaster • 3979</span>
-                      </div>
-                      <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700 }}>Connect &rarr;</span>
-                    </button>
+                      id="input-modal-reg-email"
+                    />
                   </div>
+
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>
+                        Password (min. 4 characters)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPassword(!showRegPassword)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '11.5px',
+                          color: '#2563eb',
+                          cursor: 'pointer',
+                          padding: 0,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {showRegPassword ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                    <input
+                      type={showRegPassword ? 'text' : 'password'}
+                      placeholder="Create your password"
+                      value={regPassword}
+                      onChange={e => setRegPassword(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleModalRegister()}
+                      style={{
+                        width: '100%',
+                        padding: '11px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      id="input-modal-reg-password"
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                      Confirm Password
+                    </label>
+                    <input
+                      type={showRegPassword ? 'text' : 'password'}
+                      placeholder="Confirm your password"
+                      value={regConfirmPassword}
+                      onChange={e => setRegConfirmPassword(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleModalRegister()}
+                      style={{
+                        width: '100%',
+                        padding: '11px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                      id="input-modal-reg-confirm"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => handleModalRegister()}
+                    disabled={isLoading || !regUsername.trim() || !regPassword || !regConfirmPassword}
+                    style={{
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '12px',
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      cursor: isLoading || !regUsername.trim() || !regPassword || !regConfirmPassword ? 'not-allowed' : 'pointer',
+                      opacity: isLoading || !regUsername.trim() || !regPassword || !regConfirmPassword ? 0.6 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(16, 185, 129, 0.28)',
+                    }}
+                    id="btn-modal-reg-submit"
+                  >
+                    {isLoading ? <span>Creating Account...</span> : <span>Create Account & Sign In &rarr;</span>}
+                  </button>
                 </div>
-              </div>
+              )}
             </div>
           </div>,
           document.body

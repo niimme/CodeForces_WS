@@ -174,12 +174,12 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
       setAuthError('Handle must be at least 2 characters.');
       return;
     }
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setAuthError('Please enter a valid email address.');
+    if (cleanEmail && !cleanEmail.includes('@')) {
+      setAuthError('Please enter a valid email address or leave blank.');
       return;
     }
-    if (!registerPassword || registerPassword.length < 6) {
-      setAuthError('Password must be at least 6 characters.');
+    if (!registerPassword || registerPassword.length < 4) {
+      setAuthError('Password must be at least 4 characters.');
       return;
     }
     if (registerPassword !== registerConfirm) {
@@ -189,7 +189,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
 
     setAuthLoading(true);
     try {
-      const res = registerAccount(cleanEmail, registerPassword, cleanHandle, registerLang);
+      const res = registerAccount(cleanEmail || cleanHandle, registerPassword, cleanHandle, registerLang);
       if (res.success && res.user) {
         setUser(res.user);
         onUserUpdate?.(res.user);
@@ -923,14 +923,13 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
 
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      Email Address
+                      Email Address (Optional)
                     </label>
                     <input
                       type="email"
                       value={registerEmail}
                       onChange={e => setRegisterEmail(e.target.value)}
-                      placeholder="your.email@example.com"
-                      required
+                      placeholder="your.email@example.com (optional)"
                       style={{
                         width: '100%',
                         padding: '9px 12px',
@@ -952,7 +951,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                         type="password"
                         value={registerPassword}
                         onChange={e => setRegisterPassword(e.target.value)}
-                        placeholder="At least 6 chars"
+                        placeholder="At least 4 chars"
                         required
                         style={{
                           width: '100%',

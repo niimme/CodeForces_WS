@@ -82,12 +82,12 @@ export default function LoginPage() {
       setErrorMessage('Username must be at least 2 characters long.');
       return;
     }
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setErrorMessage('Please provide a valid email address.');
+    if (cleanEmail && !cleanEmail.includes('@')) {
+      setErrorMessage('Please provide a valid email address or leave blank.');
       return;
     }
-    if (!registerPassword || registerPassword.length < 6) {
-      setErrorMessage('Password must be at least 6 characters long.');
+    if (!registerPassword || registerPassword.length < 4) {
+      setErrorMessage('Password must be at least 4 characters long.');
       return;
     }
     if (registerPassword !== registerConfirm) {
@@ -97,7 +97,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const res = registerAccount(cleanEmail, registerPassword, cleanHandle);
+      const res = registerAccount(cleanEmail || cleanHandle, registerPassword, cleanHandle);
       if (res.success && res.user) {
         setCurrentUser(res.user);
         setSuccessMessage(`Account created! Welcome, @${res.user.handle}! Redirecting...`);
@@ -520,20 +520,6 @@ export default function LoginPage() {
               >
                 {isLoading ? <span>Signing In...</span> : <span>Sign In &rarr;</span>}
               </button>
-
-              <div
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '10px',
-                  padding: '10px 12px',
-                  fontSize: '11.5px',
-                  color: '#64748b',
-                  lineHeight: 1.4,
-                }}
-              >
-                💡 <strong>Quick Access:</strong> Built-in accounts like <code>nicholas</code> or <code>tourist</code> require no password. Registered accounts use the password you created.
-              </div>
             </form>
           )}
 
@@ -581,11 +567,11 @@ export default function LoginPage() {
                     marginBottom: '6px',
                   }}
                 >
-                  Email Address
+                  Email Address (Optional)
                 </label>
                 <input
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder="name@example.com (optional)"
                   value={registerEmail}
                   onChange={e => setRegisterEmail(e.target.value)}
                   style={{
@@ -598,7 +584,6 @@ export default function LoginPage() {
                     boxSizing: 'border-box',
                   }}
                   id="input-register-email"
-                  required
                 />
               </div>
 
@@ -681,7 +666,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={isLoading || !registerHandle.trim() || !registerEmail.trim() || !registerPassword}
+                disabled={isLoading || !registerHandle.trim() || !registerPassword || !registerConfirm}
                 style={{
                   width: '100%',
                   background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
@@ -711,7 +696,7 @@ export default function LoginPage() {
         {/* Footer info note */}
         <div style={{ textAlign: 'center', marginTop: '18px' }}>
           <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-            🔒 Local practice account • No external Codeforces dependency required
+            🔒 Secure practice account • Solutions, ratings & progress saved
           </span>
         </div>
       </div>
